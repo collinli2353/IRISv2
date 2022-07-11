@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>960</width>
+    <height>640</height>
+   </rect>
+  </property>
   <property name="minimumSize">
    <size>
     <width>960</width>
@@ -13,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icons/Cornell_University_seal.svg</normaloff>icons/Cornell_University_seal.svg</iconset>
+    <normaloff>../../../../.designer/backup/icons/Cornell_University_seal.svg</normaloff>../../../../.designer/backup/icons/Cornell_University_seal.svg</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -45,13 +53,13 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>150</width>
+        <width>250</width>
         <height>0</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>200</width>
+        <width>250</width>
         <height>16777215</height>
        </size>
       </property>
@@ -335,56 +343,23 @@
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QTextEdit" name="curserX_textEdit">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>15</height>
-                 </size>
-                </property>
-                <property name="verticalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
-                </property>
-                <property name="horizontalScrollBarPolicy">
-                 <enum>Qt::ScrollBarAsNeeded</enum>
+               <widget class="QLabel" name="curserX_textEdit">
+                <property name="text">
+                 <string>#</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QTextEdit" name="curserY_textEdit">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>15</height>
-                 </size>
+               <widget class="QLabel" name="curserY_textEdit">
+                <property name="text">
+                 <string>#</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QTextEdit" name="curserZ_textEdit">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>16777215</height>
-                 </size>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>#</string>
                 </property>
                </widget>
               </item>
@@ -1212,7 +1187,7 @@ p, li { white-space: pre-wrap; }
        <item row="0" column="0">
         <widget class="QStackedWidget" name="viewer_stackedWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="multiViewer">
           <property name="sizePolicy">
@@ -1264,7 +1239,13 @@ p, li { white-space: pre-wrap; }
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="botRight_graphicsView">
+                 <widget class="QLabel" name="botRight_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1292,7 +1273,7 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QScrollBar" name="botRightTop_scrollBar">
+                   <widget class="QScrollBar" name="botRight_scrollBar">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                       <horstretch>0</horstretch>
@@ -1330,14 +1311,14 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="botRightBot_button">
+                 <widget class="QPushButton" name="botRightZoomToFit_button">
                   <property name="text">
                    <string>zoom to fit</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="botRightBot_label">
+                 <widget class="QLabel" name="botRightZoomToFit_label">
                   <property name="text">
                    <string># of #</string>
                   </property>
@@ -1387,7 +1368,13 @@ p, li { white-space: pre-wrap; }
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="topLeft_graphicsView">
+                 <widget class="QLabel" name="topLeft_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1453,14 +1440,14 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="topLeftBot_button">
+                 <widget class="QPushButton" name="topLeftZoomToFit_button">
                   <property name="text">
                    <string>zoom to fit</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="topoLeftBot_label">
+                 <widget class="QLabel" name="topoLeftZoomToFit_label">
                   <property name="text">
                    <string># of #</string>
                   </property>
@@ -1510,7 +1497,13 @@ p, li { white-space: pre-wrap; }
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="botLeft_graphicsView">
+                 <widget class="QLabel" name="botLeft_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="autoFillBackground">
                    <bool>false</bool>
                   </property>
@@ -1541,7 +1534,7 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item>
-                   <widget class="QScrollBar" name="botLeftTop_scrollBar">
+                   <widget class="QScrollBar" name="botLeft_scrollBar">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                       <horstretch>0</horstretch>
@@ -1579,14 +1572,14 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="botLeftBot_button">
+                 <widget class="QPushButton" name="botLeftZoomToFit_button">
                   <property name="text">
                    <string>zoom to fit</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="botLeftBot_label">
+                 <widget class="QLabel" name="botLeftZoomToFit_label">
                   <property name="text">
                    <string># of #</string>
                   </property>
@@ -1636,7 +1629,13 @@ p, li { white-space: pre-wrap; }
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="topRight_graphicsView">
+                 <widget class="QLabel" name="topRight_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1702,14 +1701,14 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="topRightBot_button">
+                 <widget class="QPushButton" name="topRightZoomToFit_button">
                   <property name="text">
                    <string>zoom to fit</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="topRightBot_label">
+                 <widget class="QLabel" name="topRightZoomToFit_label">
                   <property name="text">
                    <string># of #</string>
                   </property>
@@ -1814,7 +1813,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>960</width>
-     <height>22</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

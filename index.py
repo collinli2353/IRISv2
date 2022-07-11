@@ -3,16 +3,16 @@ import sys
 
 import nibabel as nib
 import numpy as np
-import PySide2
+import PySide6
 from PIL import Image, ImageQt
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from qt_material import *
 
-from qtredux.Component import qtComponent
+# from qtredux.Component import qtComponent
 from ui_MainWindow import *
 
 
-class MainWindow(qtComponent, PySide2.QtWidgets.QMainWindow):
+class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.__initState__()
@@ -67,6 +67,27 @@ class MainWindow(qtComponent, PySide2.QtWidgets.QMainWindow):
         self.ui.botLeft_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
         self.ui.botRight_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
 
+        def set_viewer_stackedWidget_index(index):
+            self.state['img_obj']['viewer_type'] = index
+
+        self.ui.single_button.clicked.connect(lambda: set_viewer_stackedWidget_index(4))
+        self.ui.topLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(0))
+        self.ui.topRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(1))
+        self.ui.botLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(2))
+        self.ui.botRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(3))
+
+        # QLabel actions
+        self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
+        self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
+        self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
+        self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
+
+        # QScrollBar actions
+        self.ui.topLeft_scrollBar.valueChanged.connect(self.topLeft_scrollBarValueChanged)
+        self.ui.topRight_scrollBar.valueChanged.connect(self.topRight_scrollBarValueChanged)
+        self.ui.botLeft_scrollBar.valueChanged.connect(self.botLeft_scrollBarValueChanged)
+        self.ui.botRight_scrollBar.valueChanged.connect(self.botRight_scrollBarValueChanged)
+
         self.update()
         self.show()
 
@@ -81,15 +102,12 @@ class MainWindow(qtComponent, PySide2.QtWidgets.QMainWindow):
                 'val_win': 0,
                 'val_lev': 0,
                 'foc_pos': [160, 160, 100],
-                'zoom': 1.0,
+                'zoom_factor': 1.0,
                 'shift': [0, 0, 0],
                 'RAIcode': 'LAI',
                 'axismapping': None,
-                'transX': [0, 0, 0],
-                'transY': [0, 0, 0],
-                'ismain': [False, False, False],
-                'isdisplay': [True, True, True],
-                'isimgloaded': False,
+                'trans': [0, 0, 0],
+                'viewer_type': 4, # 0 - 4 where 0-4 represent axial, coronal, mixed, sagittal & 4 represents multi_viewer 
                 'isdicom': False,
             }
         }
@@ -129,14 +147,23 @@ class MainWindow(qtComponent, PySide2.QtWidgets.QMainWindow):
         self.state['img_obj']['RAIcode'] = 'LAI'
         self.state['img_obj']['axismapping'] = None
 
+        self.ui.topLeft_scrollBar.setMinimum(1)
+        self.ui.topRight_scrollBar.setMinimum(1)
+        self.ui.botRight_scrollBar.setMinimum(1)
+
+        self.ui.topLeft_scrollBar.setMaximum(self.state['img_obj']['img_size'][0])
+        self.ui.topRight_scrollBar.setMaximum(self.state['img_obj']['img_size'][1])
+        self.ui.botRight_scrollBar.setMaximum(self.state['img_obj']['img_size'][2])
+
+        self.update_scrollBars()
         self.update()
         
 
     def getValidFilePath(self, prompt='', filter='Default(*.nii *.nii.gz *.dcm);;*.nii.gz;;*.nii;;*dcm;;All Files(*)', is_save=False):
         if is_save:
-            func = PySide2.QtWidgets.QFileDialog.getSaveFileName
+            func = PySide6.QtWidgets.QFileDialog.getSaveFileName
         else:
-            func = PySide2.QtWidgets.QFileDialog.getOpenFileName
+            func = PySide6.QtWidgets.QFileDialog.getOpenFileName
 
         return func(
             self.ui.menubar,
@@ -148,71 +175,100 @@ class MainWindow(qtComponent, PySide2.QtWidgets.QMainWindow):
     # KeyPress Events ================================== #
     # ================================================== #
     def keyPressEvent(self, event):
-
-        self.store.dispatch({
-            'type': 'UPDATE_TRIGGER_KEY_PRESSED',
-            'key_pressed': event.key(),
-        })
+        print(event.key(), 'pressed')
 
     def keyReleaseEvent(self, event):
+        print(event.key(), 'released')
 
-        self.store.dispatch({
-            'type': 'UPDATE_TRIGGER_KEY_RELEASED',
-            'key_released': event.key(),
-        })
+    def resizeEvent(self, event):
+        print('resizedEvent', event)
+        self.update_multi_viewer()
+
+    def topLeft_labelMousePressEvent(self, event):
+        print('topLeft_labelMousePressEvent', event.x(), event.y())
+
+    def topRight_labelMousePressEvent(self, event):
+        print('topRight_labelMousePressEvent', event.x(), event.y())
+
+    def botLeft_labelMousePressEvent(self, event):
+        print('botLeft_labelMousePressEvent', event.x(), event.y())
+
+    def botRight_labelMousePressEvent(self, event):
+        print('botRight_labelMousePressEvent', event.x(), event.y())
+
+    # ================================================== #
+    # Slider Actions =================================== #
+    # ================================================== #
+    def topLeft_scrollBarValueChanged(self, value):
+        self.state['img_obj']['foc_pos'][0] = value-1
+        self.update()
+
+    def topRight_scrollBarValueChanged(self, value):
+        self.state['img_obj']['foc_pos'][1] = value-1
+        self.update()
+
+    def botLeft_scrollBarValueChanged(self, value):
+        self.update()
+
+    def botRight_scrollBarValueChanged(self, value):
+        self.state['img_obj']['foc_pos'][2] = value-1
+        self.update()
 
     # ================================================== #
     # Update Events ==================================== #
     # ================================================== #
     def update(self):
-        print('update')
-        self.update_viewer()
+        if self.state['img_obj']['viewer_type'] == 4:
+            self.update_multi_viewer()
+        else:
+            self.update_single_viewer()
+        self.update_scrollBarLabels()
 
-    def update_viewer(self):
-        print(self.state)
+    def update_single_viewer(self):
+        print('update_single_viewer', self.state['img_obj']['viewer_type'])
+
+    def update_multi_viewer(self):
         x, y, z = self.state['img_obj']['foc_pos']
         x_img = self.state['img_obj']['img'][x, :, :]
         y_img = self.state['img_obj']['img'][:, y, :]
         z_img = self.state['img_obj']['img'][:, :, z]
 
-        x_img = np.stack([x_img.T, x_img.T, x_img.T], axis=-1)
-        y_img = np.stack([y_img.T, y_img.T, y_img.T], axis=-1)
-        z_img = np.stack([z_img.T, z_img.T, z_img.T], axis=-1)
+        imgs = [x_img, y_img, z_img]
 
-        x_img = (x_img * 255).astype(np.uint8)
-        y_img = (y_img * 255).astype(np.uint8)
-        z_img = (z_img * 255).astype(np.uint8)
+        # All label should be same size
+        multi_size = (self.ui.topLeft_frame.width(), self.ui.topLeft_frame.height())
+        multi_newshape = (round(multi_size[0] * self.state['img_obj']['zoom_factor']),
+                         (round(multi_size[1] * self.state['img_obj']['zoom_factor'])))
+        multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.state['img_obj']['trans'][0],
+                       (multi_size[1] - multi_newshape[1]) // 2+self.state['img_obj']['trans'][1])
 
-        x_img = Image.fromarray(x_img, mode='RGB')
-        y_img = Image.fromarray(y_img, mode='RGB')
-        z_img = Image.fromarray(z_img, mode='RGB')
+        for index in range(len(imgs)):
+            i = imgs[index]
+            i = np.stack([i.T, i.T, i.T], axis=-1)
+            i = (i * 255).astype(np.uint8)
+            i = Image.fromarray(i, mode='RGB')
+            scaled_img = i.resize(multi_newshape, resample=Image.NEAREST)
+            final_img = Image.new(i.mode, multi_size, color='black')
+            final_img.paste(scaled_img, multi_margin)
+            final_img = ImageQt.ImageQt(final_img.convert('RGBA'))
+            imgs[index] = PySide6.QtGui.QPixmap.fromImage(final_img)
 
-        x_img = ImageQt.ImageQt(x_img.convert('RGBA'))
-        y_img = ImageQt.ImageQt(y_img.convert('RGBA'))
-        z_img = ImageQt.ImageQt(z_img.convert('RGBA'))
-        
-        x_pixmap = PySide2.QtGui.QPixmap.fromImage(x_img)
-        y_pixmap = PySide2.QtGui.QPixmap.fromImage(y_img)
-        z_pixmap = PySide2.QtGui.QPixmap.fromImage(z_img)
+        self.ui.topLeft_label.setPixmap(imgs[0])
+        self.ui.topRight_label.setPixmap(imgs[1])
+        self.ui.botRight_label.setPixmap(imgs[2])
 
-        print('end')
+    def update_scrollBars(self):
+        self.ui.topLeft_scrollBar.setValue(self.state['img_obj']['foc_pos'][0])
+        self.ui.topRight_scrollBar.setValue(self.state['img_obj']['foc_pos'][1])
+        self.ui.botRight_scrollBar.setValue(self.state['img_obj']['foc_pos'][2])
 
-        self.ui.topLeft_graphicsView.setPixmap(x_pixmap)
-        self.ui.topRight_graphicsView.setPixmap(y_pixmap)
-        self.ui.botRight_graphicsView.setPixmap(z_pixmap)
+    def update_scrollBarLabels(self):        
+        self.ui.topLeftZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][0]) + ' of ' + str(self.state['img_obj']['img_size'][0]))
+        self.ui.topRightZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][1]) + ' of ' + str(self.state['img_obj']['img_size'][1]))
+        self.ui.botRightZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][2]) + ' of ' + str(self.state['img_obj']['img_size'][2]))
 
-        self.ui.singleTop_graphicsView.setPixmap(x_pixmap)
-
-
-
-
-
-        
-    
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
-    sys.exit(app.exec_())
-
-
+    sys.exit(app.exec())
