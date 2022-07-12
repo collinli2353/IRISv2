@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowgiwVlp.ui'
+## Form generated from reading UI file 'MainWindowviyCGA.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -192,20 +192,20 @@ class Ui_MainWindow(object):
         self.cursorPos_frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_2 = QHBoxLayout(self.cursorPos_frame)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.curserX_textEdit = QLabel(self.cursorPos_frame)
-        self.curserX_textEdit.setObjectName(u"curserX_textEdit")
+        self.curserX_label = QLabel(self.cursorPos_frame)
+        self.curserX_label.setObjectName(u"curserX_label")
 
-        self.horizontalLayout_2.addWidget(self.curserX_textEdit)
+        self.horizontalLayout_2.addWidget(self.curserX_label)
 
-        self.curserY_textEdit = QLabel(self.cursorPos_frame)
-        self.curserY_textEdit.setObjectName(u"curserY_textEdit")
+        self.curserY_label = QLabel(self.cursorPos_frame)
+        self.curserY_label.setObjectName(u"curserY_label")
 
-        self.horizontalLayout_2.addWidget(self.curserY_textEdit)
+        self.horizontalLayout_2.addWidget(self.curserY_label)
 
-        self.label_3 = QLabel(self.cursorPos_frame)
-        self.label_3.setObjectName(u"label_3")
+        self.curserZ_label = QLabel(self.cursorPos_frame)
+        self.curserZ_label.setObjectName(u"curserZ_label")
 
-        self.horizontalLayout_2.addWidget(self.label_3)
+        self.horizontalLayout_2.addWidget(self.curserZ_label)
 
 
         self.verticalLayout_2.addWidget(self.cursorPos_frame)
@@ -1130,9 +1130,9 @@ class Ui_MainWindow(object):
         self.toolbar7_button.setText(QCoreApplication.translate("MainWindow", u"8", None))
         self.toolbar2_button.setText(QCoreApplication.translate("MainWindow", u"3", None))
         self.curserPos_label.setText(QCoreApplication.translate("MainWindow", u"Curser Position (x,y,z)", None))
-        self.curserX_textEdit.setText(QCoreApplication.translate("MainWindow", u"#", None))
-        self.curserY_textEdit.setText(QCoreApplication.translate("MainWindow", u"#", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"#", None))
+        self.curserX_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
+        self.curserY_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
+        self.curserZ_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
         self.curserIntensity_label.setText(QCoreApplication.translate("MainWindow", u"Intensity (min,max,cur):", None))
         self.smartClickType_label.setText(QCoreApplication.translate("MainWindow", u"SmartClick Type", None))
         self.smartClickType2D_button.setText(QCoreApplication.translate("MainWindow", u"2D", None))

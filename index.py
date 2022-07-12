@@ -8,9 +8,10 @@ from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
 from qt_material import *
 
+from globalConstants import IMG_OBJ, TOOL_OBJ
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
-
+from utils.utils import theCrossPen
 
 class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __init__(self):
@@ -61,26 +62,26 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.toolbar9_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(9))
 
         # Window actions
-        self.ui.single_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(0))
-        self.ui.topLeft_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
-        self.ui.topRight_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
-        self.ui.botLeft_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
-        self.ui.botRight_button.clicked.connect(lambda: self.ui.viewer_stackedWidget.setCurrentIndex(1))
+        def set_viewer_stackedWidget_index(viewerTypeIndex, stackedWidgetIndex):
+            self.IMG_OBJ.VIEWER_TYPE = viewerTypeIndex
+            self.ui.viewer_stackedWidget.setCurrentIndex(stackedWidgetIndex)
 
-        def set_viewer_stackedWidget_index(index):
-            self.state['img_obj']['viewer_type'] = index
-
-        self.ui.single_button.clicked.connect(lambda: set_viewer_stackedWidget_index(4))
-        self.ui.topLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(0))
-        self.ui.topRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(1))
-        self.ui.botLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(2))
-        self.ui.botRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(3))
+        self.ui.single_button.clicked.connect(lambda: set_viewer_stackedWidget_index(4, 0))
+        self.ui.topLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(0, 1))
+        self.ui.topRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(1, 1))
+        self.ui.botLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(2, 1))
+        self.ui.botRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(3, 1))
 
         # QLabel actions
-        self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
-        self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
-        self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
-        self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
+        # self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
+        # self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
+        # self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
+        # self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
+
+        self.ui.topLeft_label.mouseMoveEvent = self.topLeft_labelMouseMoveEvent
+        self.ui.topRight_label.mouseMoveEvent = self.topRight_labelMouseMoveEvent
+        self.ui.botLeft_label.mouseMoveEvent = self.botLeft_labelMouseMoveEvent
+        self.ui.botRight_label.mouseMoveEvent = self.botRight_labelMouseMoveEvent
 
         # QScrollBar actions
         self.ui.topLeft_scrollBar.valueChanged.connect(self.topLeft_scrollBarValueChanged)
@@ -88,29 +89,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.botLeft_scrollBar.valueChanged.connect(self.botLeft_scrollBarValueChanged)
         self.ui.botRight_scrollBar.valueChanged.connect(self.botRight_scrollBarValueChanged)
 
+        self.init_scrollBars()
+        self.update_scrollBars()
         self.update()
         self.show()
 
     def __initState__(self):
-        self.state = {
-            'img_obj': {
-                'img': np.zeros([320, 320, 320]),
-                'affine': None,
-                'header': None,
-                'img_size': (320, 320, 320),
-                'min_max': [0, 0],
-                'val_win': 0,
-                'val_lev': 0,
-                'foc_pos': [160, 160, 100],
-                'zoom_factor': 1.0,
-                'shift': [0, 0, 0],
-                'RAIcode': 'LAI',
-                'axismapping': None,
-                'trans': [0, 0, 0],
-                'viewer_type': 4, # 0 - 4 where 0-4 represent axial, coronal, mixed, sagittal & 4 represents multi_viewer 
-                'isdicom': False,
-            }
-        }
+        self.IMG_OBJ = IMG_OBJ()
+        self.TOOL_OBJ = TOOL_OBJ()
 
     # ================================================== #
     # Menubar Actions ================================== #
@@ -122,39 +108,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.openImage(fp)
 
     def openImage(self, fp):
-        img_nii, img_affine, img_header = None, None, None
+        self.IMG_OBJ.__loadImage__(fp)
 
-        # TODO: make work for dcm files
-        if fp.split('.')[-1] == 'dcm':
-            self.state['img_obj']['isdicom'] = True
-        else:
-            img_nii = nib.load(fp)
-            np_img, img_affine, img_header = img_nii.get_fdata(), img_nii.affine, img_nii.header
-            self.state['img_obj']['isdicom'] = False
-            # TODO: axismapping to display correctly
-
-        self.state['img_obj']['img'] = np_img
-        self.state['img_obj']['affine'] = img_affine
-        self.state['img_obj']['header'] = img_header
-        self.state['img_obj']['img_size'] = np_img.shape
-        self.state['img_obj']['min_max'] = [np_img.min(), np_img.max()]
-        self.state['img_obj']['val_win'] = 0
-        self.state['img_obj']['val_lev'] = 0
-        self.state['img_obj']['foc_pos'] = [int(np_img.shape[0]/2), int(np_img.shape[1]/2), int(np_img.shape[2]/2)]
-        self.state['img_obj']['zoom'] = 1.0
-        self.state['img_obj']['shift'] = [0, 0, 0]
-        # TODO: fix RAIcode
-        self.state['img_obj']['RAIcode'] = 'LAI'
-        self.state['img_obj']['axismapping'] = None
-
-        self.ui.topLeft_scrollBar.setMinimum(1)
-        self.ui.topRight_scrollBar.setMinimum(1)
-        self.ui.botRight_scrollBar.setMinimum(1)
-
-        self.ui.topLeft_scrollBar.setMaximum(self.state['img_obj']['img_size'][0])
-        self.ui.topRight_scrollBar.setMaximum(self.state['img_obj']['img_size'][1])
-        self.ui.botRight_scrollBar.setMaximum(self.state['img_obj']['img_size'][2])
-
+        self.init_scrollBars()
         self.update_scrollBars()
         self.update()
         
@@ -181,68 +137,120 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print(event.key(), 'released')
 
     def resizeEvent(self, event):
-        print('resizedEvent', event)
         self.update_multi_viewer()
 
-    def topLeft_labelMousePressEvent(self, event):
-        print('topLeft_labelMousePressEvent', event.x(), event.y())
+    def topLeft_labelMouseMoveEvent(self, event):
+        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.IMG_OBJ.FOC_POS = [
+                    max(0, min(self.IMG_OBJ.SHAPE[1]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]))),
+                    max(0, min(self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0]))),
+                    self.IMG_OBJ.FOC_POS[2],
+                ]
 
-    def topRight_labelMousePressEvent(self, event):
-        print('topRight_labelMousePressEvent', event.x(), event.y())
+            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
+                pass
 
-    def botLeft_labelMousePressEvent(self, event):
+            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
+                pass            
+
+        self.update_scrollBars()
+        self.update()
+
+    def topRight_labelMouseMoveEvent(self, event):
+        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.IMG_OBJ.FOC_POS = [
+                    self.IMG_OBJ.FOC_POS[0],
+                    max(0, min(self.IMG_OBJ.SHAPE[1]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]))),
+                    max(0, min(self.IMG_OBJ.SHAPE[2]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[2]))),
+                ]
+
+            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
+                pass
+
+            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
+                pass
+        
+
+        self.update_scrollBars()
+        self.update()
+
+    def botLeft_labelMouseMoveEvent(self, event):
         print('botLeft_labelMousePressEvent', event.x(), event.y())
 
-    def botRight_labelMousePressEvent(self, event):
-        print('botRight_labelMousePressEvent', event.x(), event.y())
+    def botRight_labelMouseMoveEvent(self, event):
+        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.IMG_OBJ.FOC_POS = [
+                    max(0, min(self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0]))),
+                    self.IMG_OBJ.FOC_POS[1],
+                    max(0, min(self.IMG_OBJ.SHAPE[2]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[2]))),
+                ]
+
+            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
+                pass
+
+            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
+                pass
+
+        self.update_scrollBars()
+        self.update()
 
     # ================================================== #
     # Slider Actions =================================== #
     # ================================================== #
     def topLeft_scrollBarValueChanged(self, value):
-        self.state['img_obj']['foc_pos'][0] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']] = value-1
         self.update()
 
     def topRight_scrollBarValueChanged(self, value):
-        self.state['img_obj']['foc_pos'][1] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']] = value-1
         self.update()
 
     def botLeft_scrollBarValueChanged(self, value):
         self.update()
 
     def botRight_scrollBarValueChanged(self, value):
-        self.state['img_obj']['foc_pos'][2] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']] = value-1
         self.update()
 
     # ================================================== #
     # Update Events ==================================== #
     # ================================================== #
     def update(self):
-        if self.state['img_obj']['viewer_type'] == 4:
+        self.update_scrollBarLabels()
+        self.update_curserLabels()
+        if self.IMG_OBJ.VIEWER_TYPE == 4:
             self.update_multi_viewer()
         else:
             self.update_single_viewer()
-        self.update_scrollBarLabels()
 
     def update_single_viewer(self):
-        print('update_single_viewer', self.state['img_obj']['viewer_type'])
+        print('update_single_viewer', self.IMG_OBJ.VIEWER_TYPE)
 
+    # TODO: Multithread this operation
     def update_multi_viewer(self):
-        x, y, z = self.state['img_obj']['foc_pos']
-        x_img = self.state['img_obj']['img'][x, :, :]
-        y_img = self.state['img_obj']['img'][:, y, :]
-        z_img = self.state['img_obj']['img'][:, :, z]
+        x, y, z = self.IMG_OBJ.FOC_POS
+        x_img = self.IMG_OBJ.NP_IMG[x, :, :]
+        y_img = self.IMG_OBJ.NP_IMG[:, y, :]
+        z_img = self.IMG_OBJ.NP_IMG[:, :, z]
 
         imgs = [x_img, y_img, z_img]
 
         # All label should be same size
-        multi_size = (self.ui.topLeft_frame.width(), self.ui.topLeft_frame.height())
-        multi_newshape = (round(multi_size[0] * self.state['img_obj']['zoom_factor']),
-                         (round(multi_size[1] * self.state['img_obj']['zoom_factor'])))
-        multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.state['img_obj']['trans'][0],
-                       (multi_size[1] - multi_newshape[1]) // 2+self.state['img_obj']['trans'][1])
+        multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
+        multi_newshape = (round(multi_size[0] * self.IMG_OBJ.ZOOM_FACTOR),
+                         (round(multi_size[1] * self.IMG_OBJ.ZOOM_FACTOR)))
+        
 
         for index in range(len(imgs)):
+            axisMappingX, axisMappingY = self.IMG_OBJ.AXISMAPPING[index]
+
+            multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.IMG_OBJ.TRANS[axisMappingX],
+                            (multi_size[1] - multi_newshape[1]) // 2+self.IMG_OBJ.TRANS[axisMappingY])
+
+
             i = imgs[index]
             i = np.stack([i.T, i.T, i.T], axis=-1)
             i = (i * 255).astype(np.uint8)
@@ -251,22 +259,50 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             final_img = Image.new(i.mode, multi_size, color='black')
             final_img.paste(scaled_img, multi_margin)
             final_img = ImageQt.ImageQt(final_img.convert('RGBA'))
-            imgs[index] = PySide6.QtGui.QPixmap.fromImage(final_img)
+            pixmap_img = PySide6.QtGui.QPixmap.fromImage(final_img)
 
-        self.ui.topLeft_label.setPixmap(imgs[0])
-        self.ui.topRight_label.setPixmap(imgs[1])
-        self.ui.botRight_label.setPixmap(imgs[2])
+            painter_img = PySide6.QtGui.QPainter(pixmap_img)
+            painter_img.setPen(theCrossPen())
+
+            
+            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * pixmap_img.height(), self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * pixmap_img.width()]
+
+            # Draw cross
+            painter_img.drawLine(0, scaled_foc_pos2D[0], pixmap_img.width(), scaled_foc_pos2D[0])
+            painter_img.drawLine(scaled_foc_pos2D[1], 0, scaled_foc_pos2D[1], pixmap_img.height())
+            
+            painter_img.end()
+
+            imgs[index] = pixmap_img
+
+
+        self.ui.topLeft_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['topLeft']])
+        self.ui.topRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['topRight']])
+        self.ui.botRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['botRight']])
+
+    def init_scrollBars(self):
+        self.ui.topLeft_scrollBar.setMinimum(1)
+        self.ui.topRight_scrollBar.setMinimum(1)
+        self.ui.botRight_scrollBar.setMinimum(1)
+
+        self.ui.topLeft_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topLeft']])
+        self.ui.topRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topRight']])
+        self.ui.botRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['botRight']])
 
     def update_scrollBars(self):
-        self.ui.topLeft_scrollBar.setValue(self.state['img_obj']['foc_pos'][0])
-        self.ui.topRight_scrollBar.setValue(self.state['img_obj']['foc_pos'][1])
-        self.ui.botRight_scrollBar.setValue(self.state['img_obj']['foc_pos'][2])
+        self.ui.topLeft_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]+1)
+        self.ui.topRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']]+1)
+        self.ui.botRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']]+1)
 
     def update_scrollBarLabels(self):        
-        self.ui.topLeftZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][0]) + ' of ' + str(self.state['img_obj']['img_size'][0]))
-        self.ui.topRightZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][1]) + ' of ' + str(self.state['img_obj']['img_size'][1]))
-        self.ui.botRightZoomToFit_label.setText(str(self.state['img_obj']['foc_pos'][2]) + ' of ' + str(self.state['img_obj']['img_size'][2]))
+        self.ui.topLeftZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]))
+        self.ui.topRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topRight']]))
+        self.ui.botRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['botRight']]))
 
+    def update_curserLabels(self):
+        self.ui.curserX_label.setNum(self.IMG_OBJ.FOC_POS[0]+1)
+        self.ui.curserY_label.setNum(self.IMG_OBJ.FOC_POS[1]+1)
+        self.ui.curserZ_label.setNum(self.IMG_OBJ.FOC_POS[2]+1)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
