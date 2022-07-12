@@ -1,17 +1,21 @@
 import os
 import sys
+from tkinter.font import BOLD
 
 import nibabel as nib
 import numpy as np
 import PySide6
 from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QColor as rgb
 from qt_material import *
 
-from globalConstants import IMG_OBJ, TOOL_OBJ
+from utils.globalConstants import IMG_OBJ, TOOL_OBJ
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
-from utils.utils import theCrossPen
+from utils.utils import clamp, lettersPen, theCrossPen
+
+from dialogs.reorientImageDialog import ReorientImageDialog
 
 class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __init__(self):
@@ -48,6 +52,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
+        self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
 
         # Toolbar actions
         self.ui.toolbar0_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))   
@@ -97,6 +102,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __initState__(self):
         self.IMG_OBJ = IMG_OBJ()
         self.TOOL_OBJ = TOOL_OBJ()
+        self.reorientDialog = ReorientImageDialog()
 
     # ================================================== #
     # Menubar Actions ================================== #
@@ -126,6 +132,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             caption=prompt,
             filter=filter,
         )
+
+    def openReorientDialog(self):
+        self.reorientDialog.exec()
     
     # ================================================== #
     # KeyPress Events ================================== #
@@ -140,13 +149,23 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.update_multi_viewer()
 
     def topLeft_labelMouseMoveEvent(self, event):
+        [x, y, z] = [
+            clamp(0, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]), self.IMG_OBJ.SHAPE[1]-1),
+            clamp(0, self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0])),
+            self.IMG_OBJ.FOC_POS[2]
+        ]
+
+        # Flip horizontally
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topLeft']][0]:
+            x = self.IMG_OBJ.SHAPE[0] - x - 1
+
+        # Flip vertically
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topLeft']][1]:
+            y = self.IMG_OBJ.SHAPE[1] - y - 1
+
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [
-                    max(0, min(self.IMG_OBJ.SHAPE[1]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]))),
-                    max(0, min(self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0]))),
-                    self.IMG_OBJ.FOC_POS[2],
-                ]
+                self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
                 pass
@@ -158,13 +177,23 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.update()
 
     def topRight_labelMouseMoveEvent(self, event):
+        [x, y, z] = [
+            self.IMG_OBJ.FOC_POS[0],
+            clamp(0, int(event.x()/self.ui.topRight_label.width()*self.IMG_OBJ.SHAPE[1]), self.IMG_OBJ.SHAPE[1]-1),
+            clamp(0, int(event.y()/self.ui.topRight_label.height()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
+        ]
+
+        # Flip horizontally
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topRight']][0]:
+            y = self.IMG_OBJ.SHAPE[1] - y - 1
+
+        # Flip vertically
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topRight']][1]:
+            z = self.IMG_OBJ.SHAPE[2] - z - 1
+
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [
-                    self.IMG_OBJ.FOC_POS[0],
-                    max(0, min(self.IMG_OBJ.SHAPE[1]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]))),
-                    max(0, min(self.IMG_OBJ.SHAPE[2]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[2]))),
-                ]
+                self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
                 pass
@@ -180,13 +209,23 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print('botLeft_labelMousePressEvent', event.x(), event.y())
 
     def botRight_labelMouseMoveEvent(self, event):
+        [x, y, z] = [
+            clamp(0, int(event.y()/self.ui.botRight_label.height()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
+            self.IMG_OBJ.FOC_POS[1],
+            clamp(0, int(event.x()/self.ui.botRight_label.width()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
+        ]
+
+        # Flip horizontally
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['botRight']][0]:
+            x = self.IMG_OBJ.SHAPE[0] - x - 1
+
+        # Flip vertically
+        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['botRight']][1]:
+            z = self.IMG_OBJ.SHAPE[2] - z - 1
+
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [
-                    max(0, min(self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0]))),
-                    self.IMG_OBJ.FOC_POS[1],
-                    max(0, min(self.IMG_OBJ.SHAPE[2]-1, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[2]))),
-                ]
+                self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
                 pass
@@ -249,7 +288,18 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
             multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.IMG_OBJ.TRANS[axisMappingX],
                             (multi_size[1] - multi_newshape[1]) // 2+self.IMG_OBJ.TRANS[axisMappingY])
+            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * multi_size[1], self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * multi_size[0]]
+            
+            # Transform
+            ## Flip horizontally
+            if self.IMG_OBJ.FLIP[index][0]:
+                imgs[index] = np.fliplr(imgs[index])
+                scaled_foc_pos2D[0] = multi_size[0] - scaled_foc_pos2D[0]
 
+            ## Flip vertically
+            if self.IMG_OBJ.FLIP[index][1]:
+                imgs[index] = np.flipud(imgs[index])
+                scaled_foc_pos2D[1] = multi_size[1] - scaled_foc_pos2D[1]
 
             i = imgs[index]
             i = np.stack([i.T, i.T, i.T], axis=-1)
@@ -259,17 +309,23 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             final_img = Image.new(i.mode, multi_size, color='black')
             final_img.paste(scaled_img, multi_margin)
             final_img = ImageQt.ImageQt(final_img.convert('RGBA'))
-            pixmap_img = PySide6.QtGui.QPixmap.fromImage(final_img)
+            pixmap_img = PySide6.QtGui.QPixmap.fromImage(final_img)         
 
             painter_img = PySide6.QtGui.QPainter(pixmap_img)
             painter_img.setPen(theCrossPen())
 
-            
-            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * pixmap_img.height(), self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * pixmap_img.width()]
-
             # Draw cross
             painter_img.drawLine(0, scaled_foc_pos2D[0], pixmap_img.width(), scaled_foc_pos2D[0])
             painter_img.drawLine(scaled_foc_pos2D[1], 0, scaled_foc_pos2D[1], pixmap_img.height())
+
+            painter_img.setPen(lettersPen(rgb(227, 170, 0)))
+
+            # Draw letters
+            painter_img.setFont(QtGui.QFont('Robato', 10, QFont.Bold))
+            painter_img.drawText(pixmap_img.width()//2, 15, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][0]) # TOP
+            painter_img.drawText(pixmap_img.width()-15, pixmap_img.height()//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][1]) # RIGHT
+            painter_img.drawText(pixmap_img.width()//2, pixmap_img.height()-5, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][2]) # BOT
+            painter_img.drawText(5, pixmap_img.height()//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][3]) # LEFT
             
             painter_img.end()
 

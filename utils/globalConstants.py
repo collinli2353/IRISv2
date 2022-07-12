@@ -1,29 +1,35 @@
 import numpy as np
 import nibabel as nib
 
-class IMG_OBJ:
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(
+                Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class IMG_OBJ(metaclass=Singleton):
     FP = None
     NIBABEL_IMG = None
-    ORIG_NP_IMG = np.zeros([100, 100, 100])
-    NP_IMG = np.zeros([100, 100, 100])
+    ORIG_NP_IMG = None
+    NP_IMG = None
     AFFINE = None
     HEADER = None
-    SHAPE = (100, 100, 100)
-    MIN_MAX_INTENSITIES = (0, 0)
-    WINDOW_LEVEL = 0
-    LEVEL_VALUE = 0
-    FOC_POS = [50, 50, 50]
-    ZOOM_FACTOR = 1
-    TRANS = [0, 0, 0]
+    SHAPE = None
+    MIN_MAX_INTENSITIES = None
+    LEVEL_VALUE = None
+    FOC_POS = None
+    ZOOM_FACTOR = None
+    TRANS = None
+    FLIP = None
     RAI_CODE = None
-    AXISMAPPING = [[1, 2], [0, 2], [0, 1]]
-    VIEWER_MAPPING = {
-        'topLeft': 2,
-        'topRight': 0,
-        'botRight': 1,
-    }
-    VIEWER_TYPE = 4
-    IS_DICOM = False
+    RAI_DISPLAY_LETTERS = None
+    AXISMAPPING = None
+    VIEWER_MAPPING = None
+    VIEWER_TYPE = None
+    IS_DICOM = None
 
     def __init__(self):
         self.FP = None
@@ -39,13 +45,24 @@ class IMG_OBJ:
         self.FOC_POS = [50, 50, 50]
         self.ZOOM_FACTOR = 1
         self.TRANS = [0, 0, 0]
+        self.FLIP = [
+        #   (fliplr, flipud)
+            [False,  False], 
+            [True,  True],
+            [False,  False],
+        ]
         self.RAI_CODE = None
+        self.RAI_DISPLAY_LETTERS = [
+            ['S', 'P', 'I', 'A'],
+            ['S', 'L', 'I', 'R'],
+            ['A', 'L', 'P', 'R'],
+        ]
         self.VIEWER_MAPPING = {
             'topLeft': 2,
             'topRight': 0,
             'botRight': 1,
         }
-        self.AXISMAPPING = [[2, 1], [0, 2], [0, 1]]
+        self.AXISMAPPING = [[2, 1], [0, 2], [1, 0]]
         self.VIEWER_TYPE = 4
         self.IS_DICOM = False
 
@@ -73,6 +90,6 @@ class IMG_OBJ:
     def FOC_POS_PERCENT(self):
         return [self.FOC_POS[i] / self.SHAPE[i] for i in range(len(self.FOC_POS))]
 
-class TOOL_OBJ:
+class TOOL_OBJ(metaclass=Singleton):
     ACTIVE_TOOL = 0
     ACTIVE_TOOL_NAME = 'curser'

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowviyCGA.ui'
+## Form generated from reading UI file 'MainWindowwqvYNs.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -716,77 +716,9 @@ class Ui_MainWindow(object):
         self.multiViewer.setSizePolicy(sizePolicy3)
         self.multiViewer.setBaseSize(QSize(50, 50))
         self.gridLayout = QGridLayout(self.multiViewer)
+        self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.botRight_frame = QFrame(self.multiViewer)
-        self.botRight_frame.setObjectName(u"botRight_frame")
-        self.botRight_frame.setMinimumSize(QSize(200, 200))
-        self.botRight_frame.setFrameShape(QFrame.StyledPanel)
-        self.botRight_frame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_10 = QVBoxLayout(self.botRight_frame)
-        self.verticalLayout_10.setSpacing(0)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.verticalLayout_10.setContentsMargins(0, 0, 0, 0)
-        self.botRightTop_layout = QHBoxLayout()
-        self.botRightTop_layout.setSpacing(0)
-        self.botRightTop_layout.setObjectName(u"botRightTop_layout")
-        self.botRight_label = QLabel(self.botRight_frame)
-        self.botRight_label.setObjectName(u"botRight_label")
-        sizePolicy.setHeightForWidth(self.botRight_label.sizePolicy().hasHeightForWidth())
-        self.botRight_label.setSizePolicy(sizePolicy)
-
-        self.botRightTop_layout.addWidget(self.botRight_label)
-
-        self.botRightTop_frame = QVBoxLayout()
-        self.botRightTop_frame.setObjectName(u"botRightTop_frame")
-        self.botRight_button = QPushButton(self.botRight_frame)
-        self.botRight_button.setObjectName(u"botRight_button")
-        sizePolicy2.setHeightForWidth(self.botRight_button.sizePolicy().hasHeightForWidth())
-        self.botRight_button.setSizePolicy(sizePolicy2)
-        self.botRight_button.setMaximumSize(QSize(25, 25))
-
-        self.botRightTop_frame.addWidget(self.botRight_button)
-
-        self.botRight_scrollBar = QScrollBar(self.botRight_frame)
-        self.botRight_scrollBar.setObjectName(u"botRight_scrollBar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.botRight_scrollBar.sizePolicy().hasHeightForWidth())
-        self.botRight_scrollBar.setSizePolicy(sizePolicy4)
-        self.botRight_scrollBar.setMaximumSize(QSize(25, 16777215))
-        self.botRight_scrollBar.setOrientation(Qt.Vertical)
-
-        self.botRightTop_frame.addWidget(self.botRight_scrollBar)
-
-
-        self.botRightTop_layout.addLayout(self.botRightTop_frame)
-
-
-        self.verticalLayout_10.addLayout(self.botRightTop_layout)
-
-        self.botRightBot_layout = QHBoxLayout()
-        self.botRightBot_layout.setObjectName(u"botRightBot_layout")
-        self.botRightBot_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.botRightBot_layout.addItem(self.botRightBot_spacer)
-
-        self.botRightZoomToFit_button = QPushButton(self.botRight_frame)
-        self.botRightZoomToFit_button.setObjectName(u"botRightZoomToFit_button")
-
-        self.botRightBot_layout.addWidget(self.botRightZoomToFit_button)
-
-        self.botRightZoomToFit_label = QLabel(self.botRight_frame)
-        self.botRightZoomToFit_label.setObjectName(u"botRightZoomToFit_label")
-        self.botRightZoomToFit_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-
-        self.botRightBot_layout.addWidget(self.botRightZoomToFit_label)
-
-
-        self.verticalLayout_10.addLayout(self.botRightBot_layout)
-
-
-        self.gridLayout.addWidget(self.botRight_frame, 1, 1, 1, 1)
-
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.topLeft_frame = QFrame(self.multiViewer)
         self.topLeft_frame.setObjectName(u"topLeft_frame")
         self.topLeft_frame.setMinimumSize(QSize(200, 200))
@@ -818,6 +750,9 @@ class Ui_MainWindow(object):
 
         self.topLeft_scrollBar = QScrollBar(self.topLeft_frame)
         self.topLeft_scrollBar.setObjectName(u"topLeft_scrollBar")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.topLeft_scrollBar.sizePolicy().hasHeightForWidth())
         self.topLeft_scrollBar.setSizePolicy(sizePolicy4)
         self.topLeft_scrollBar.setMaximumSize(QSize(25, 16777215))
@@ -853,6 +788,140 @@ class Ui_MainWindow(object):
 
 
         self.gridLayout.addWidget(self.topLeft_frame, 0, 0, 1, 1)
+
+        self.topRight_frame = QFrame(self.multiViewer)
+        self.topRight_frame.setObjectName(u"topRight_frame")
+        self.topRight_frame.setMinimumSize(QSize(200, 200))
+        self.topRight_frame.setFrameShape(QFrame.StyledPanel)
+        self.topRight_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_9 = QVBoxLayout(self.topRight_frame)
+        self.verticalLayout_9.setSpacing(0)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.topRightTop_layout = QHBoxLayout()
+        self.topRightTop_layout.setSpacing(0)
+        self.topRightTop_layout.setObjectName(u"topRightTop_layout")
+        self.topRight_label = QLabel(self.topRight_frame)
+        self.topRight_label.setObjectName(u"topRight_label")
+        sizePolicy.setHeightForWidth(self.topRight_label.sizePolicy().hasHeightForWidth())
+        self.topRight_label.setSizePolicy(sizePolicy)
+
+        self.topRightTop_layout.addWidget(self.topRight_label)
+
+        self.topRightTop_frame = QVBoxLayout()
+        self.topRightTop_frame.setObjectName(u"topRightTop_frame")
+        self.topRight_button = QPushButton(self.topRight_frame)
+        self.topRight_button.setObjectName(u"topRight_button")
+        sizePolicy2.setHeightForWidth(self.topRight_button.sizePolicy().hasHeightForWidth())
+        self.topRight_button.setSizePolicy(sizePolicy2)
+        self.topRight_button.setMaximumSize(QSize(25, 25))
+
+        self.topRightTop_frame.addWidget(self.topRight_button)
+
+        self.topRight_scrollBar = QScrollBar(self.topRight_frame)
+        self.topRight_scrollBar.setObjectName(u"topRight_scrollBar")
+        sizePolicy4.setHeightForWidth(self.topRight_scrollBar.sizePolicy().hasHeightForWidth())
+        self.topRight_scrollBar.setSizePolicy(sizePolicy4)
+        self.topRight_scrollBar.setMaximumSize(QSize(25, 16777215))
+        self.topRight_scrollBar.setOrientation(Qt.Vertical)
+
+        self.topRightTop_frame.addWidget(self.topRight_scrollBar)
+
+
+        self.topRightTop_layout.addLayout(self.topRightTop_frame)
+
+
+        self.verticalLayout_9.addLayout(self.topRightTop_layout)
+
+        self.topRightBot_layout = QHBoxLayout()
+        self.topRightBot_layout.setObjectName(u"topRightBot_layout")
+        self.topRightBot_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.topRightBot_layout.addItem(self.topRightBot_spacer)
+
+        self.topRightZoomToFit_button = QPushButton(self.topRight_frame)
+        self.topRightZoomToFit_button.setObjectName(u"topRightZoomToFit_button")
+
+        self.topRightBot_layout.addWidget(self.topRightZoomToFit_button)
+
+        self.topRightZoomToFit_label = QLabel(self.topRight_frame)
+        self.topRightZoomToFit_label.setObjectName(u"topRightZoomToFit_label")
+        self.topRightZoomToFit_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.topRightBot_layout.addWidget(self.topRightZoomToFit_label)
+
+
+        self.verticalLayout_9.addLayout(self.topRightBot_layout)
+
+
+        self.gridLayout.addWidget(self.topRight_frame, 0, 1, 1, 1)
+
+        self.botRight_frame = QFrame(self.multiViewer)
+        self.botRight_frame.setObjectName(u"botRight_frame")
+        self.botRight_frame.setMinimumSize(QSize(200, 200))
+        self.botRight_frame.setFrameShape(QFrame.StyledPanel)
+        self.botRight_frame.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_10 = QVBoxLayout(self.botRight_frame)
+        self.verticalLayout_10.setSpacing(0)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.verticalLayout_10.setContentsMargins(0, 0, 0, 0)
+        self.botRightTop_layout = QHBoxLayout()
+        self.botRightTop_layout.setSpacing(0)
+        self.botRightTop_layout.setObjectName(u"botRightTop_layout")
+        self.botRight_label = QLabel(self.botRight_frame)
+        self.botRight_label.setObjectName(u"botRight_label")
+        sizePolicy.setHeightForWidth(self.botRight_label.sizePolicy().hasHeightForWidth())
+        self.botRight_label.setSizePolicy(sizePolicy)
+
+        self.botRightTop_layout.addWidget(self.botRight_label)
+
+        self.botRightTop_frame = QVBoxLayout()
+        self.botRightTop_frame.setObjectName(u"botRightTop_frame")
+        self.botRight_button = QPushButton(self.botRight_frame)
+        self.botRight_button.setObjectName(u"botRight_button")
+        sizePolicy2.setHeightForWidth(self.botRight_button.sizePolicy().hasHeightForWidth())
+        self.botRight_button.setSizePolicy(sizePolicy2)
+        self.botRight_button.setMaximumSize(QSize(25, 25))
+
+        self.botRightTop_frame.addWidget(self.botRight_button)
+
+        self.botRight_scrollBar = QScrollBar(self.botRight_frame)
+        self.botRight_scrollBar.setObjectName(u"botRight_scrollBar")
+        sizePolicy4.setHeightForWidth(self.botRight_scrollBar.sizePolicy().hasHeightForWidth())
+        self.botRight_scrollBar.setSizePolicy(sizePolicy4)
+        self.botRight_scrollBar.setMaximumSize(QSize(25, 16777215))
+        self.botRight_scrollBar.setOrientation(Qt.Vertical)
+
+        self.botRightTop_frame.addWidget(self.botRight_scrollBar)
+
+
+        self.botRightTop_layout.addLayout(self.botRightTop_frame)
+
+
+        self.verticalLayout_10.addLayout(self.botRightTop_layout)
+
+        self.botRightBot_layout = QHBoxLayout()
+        self.botRightBot_layout.setObjectName(u"botRightBot_layout")
+        self.botRightBot_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.botRightBot_layout.addItem(self.botRightBot_spacer)
+
+        self.botRightZoomToFit_button = QPushButton(self.botRight_frame)
+        self.botRightZoomToFit_button.setObjectName(u"botRightZoomToFit_button")
+
+        self.botRightBot_layout.addWidget(self.botRightZoomToFit_button)
+
+        self.botRightZoomToFit_label = QLabel(self.botRight_frame)
+        self.botRightZoomToFit_label.setObjectName(u"botRightZoomToFit_label")
+        self.botRightZoomToFit_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.botRightBot_layout.addWidget(self.botRightZoomToFit_label)
+
+
+        self.verticalLayout_10.addLayout(self.botRightBot_layout)
+
+
+        self.gridLayout.addWidget(self.botRight_frame, 1, 1, 1, 1)
 
         self.botLeft_frame = QFrame(self.multiViewer)
         self.botLeft_frame.setObjectName(u"botLeft_frame")
@@ -921,73 +990,6 @@ class Ui_MainWindow(object):
 
 
         self.gridLayout.addWidget(self.botLeft_frame, 1, 0, 1, 1)
-
-        self.topRight_frame = QFrame(self.multiViewer)
-        self.topRight_frame.setObjectName(u"topRight_frame")
-        self.topRight_frame.setMinimumSize(QSize(200, 200))
-        self.topRight_frame.setFrameShape(QFrame.StyledPanel)
-        self.topRight_frame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_9 = QVBoxLayout(self.topRight_frame)
-        self.verticalLayout_9.setSpacing(0)
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.topRightTop_layout = QHBoxLayout()
-        self.topRightTop_layout.setSpacing(0)
-        self.topRightTop_layout.setObjectName(u"topRightTop_layout")
-        self.topRight_label = QLabel(self.topRight_frame)
-        self.topRight_label.setObjectName(u"topRight_label")
-        sizePolicy.setHeightForWidth(self.topRight_label.sizePolicy().hasHeightForWidth())
-        self.topRight_label.setSizePolicy(sizePolicy)
-
-        self.topRightTop_layout.addWidget(self.topRight_label)
-
-        self.topRightTop_frame = QVBoxLayout()
-        self.topRightTop_frame.setObjectName(u"topRightTop_frame")
-        self.topRight_button = QPushButton(self.topRight_frame)
-        self.topRight_button.setObjectName(u"topRight_button")
-        sizePolicy2.setHeightForWidth(self.topRight_button.sizePolicy().hasHeightForWidth())
-        self.topRight_button.setSizePolicy(sizePolicy2)
-        self.topRight_button.setMaximumSize(QSize(25, 25))
-
-        self.topRightTop_frame.addWidget(self.topRight_button)
-
-        self.topRight_scrollBar = QScrollBar(self.topRight_frame)
-        self.topRight_scrollBar.setObjectName(u"topRight_scrollBar")
-        sizePolicy4.setHeightForWidth(self.topRight_scrollBar.sizePolicy().hasHeightForWidth())
-        self.topRight_scrollBar.setSizePolicy(sizePolicy4)
-        self.topRight_scrollBar.setMaximumSize(QSize(25, 16777215))
-        self.topRight_scrollBar.setOrientation(Qt.Vertical)
-
-        self.topRightTop_frame.addWidget(self.topRight_scrollBar)
-
-
-        self.topRightTop_layout.addLayout(self.topRightTop_frame)
-
-
-        self.verticalLayout_9.addLayout(self.topRightTop_layout)
-
-        self.topRightBot_layout = QHBoxLayout()
-        self.topRightBot_layout.setObjectName(u"topRightBot_layout")
-        self.topRightBot_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.topRightBot_layout.addItem(self.topRightBot_spacer)
-
-        self.topRightZoomToFit_button = QPushButton(self.topRight_frame)
-        self.topRightZoomToFit_button.setObjectName(u"topRightZoomToFit_button")
-
-        self.topRightBot_layout.addWidget(self.topRightZoomToFit_button)
-
-        self.topRightZoomToFit_label = QLabel(self.topRight_frame)
-        self.topRightZoomToFit_label.setObjectName(u"topRightZoomToFit_label")
-        self.topRightZoomToFit_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-
-        self.topRightBot_layout.addWidget(self.topRightZoomToFit_label)
-
-
-        self.verticalLayout_9.addLayout(self.topRightBot_layout)
-
-
-        self.gridLayout.addWidget(self.topRight_frame, 0, 1, 1, 1)
 
         self.viewer_stackedWidget.addWidget(self.multiViewer)
         self.singleViewer = QWidget()
@@ -1106,13 +1108,25 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"IRIS by Collin Li", None))
         self.actionOpen_Image.setText(QCoreApplication.translate("MainWindow", u"Open Image", None))
+#if QT_CONFIG(shortcut)
+        self.actionOpen_Image.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+O", None))
+#endif // QT_CONFIG(shortcut)
         self.actionOpen_Segmentation.setText(QCoreApplication.translate("MainWindow", u"Open Segmentation", None))
         self.actionOpen_Organ.setText(QCoreApplication.translate("MainWindow", u"Open Organ", None))
         self.actionSave.setText(QCoreApplication.translate("MainWindow", u"Save", None))
         self.actionSave_As.setText(QCoreApplication.translate("MainWindow", u"Save As", None))
         self.actionUndo.setText(QCoreApplication.translate("MainWindow", u"Undo", None))
+#if QT_CONFIG(shortcut)
+        self.actionUndo.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Z", None))
+#endif // QT_CONFIG(shortcut)
         self.actionRedo.setText(QCoreApplication.translate("MainWindow", u"Redo", None))
+#if QT_CONFIG(shortcut)
+        self.actionRedo.setShortcut(QCoreApplication.translate("MainWindow", u"Ctrl+Y", None))
+#endif // QT_CONFIG(shortcut)
         self.actionHide_Segmentation.setText(QCoreApplication.translate("MainWindow", u"Hide Segmentation", None))
+#if QT_CONFIG(shortcut)
+        self.actionHide_Segmentation.setShortcut(QCoreApplication.translate("MainWindow", u"S", None))
+#endif // QT_CONFIG(shortcut)
         self.actionClear_All.setText(QCoreApplication.translate("MainWindow", u"Clear All", None))
         self.actionExcluding_Organ.setText(QCoreApplication.translate("MainWindow", u"Excluding Organ", None))
         self.actionVolume_and_Statistics.setText(QCoreApplication.translate("MainWindow", u"Volume and Statistics", None))
@@ -1185,22 +1199,22 @@ class Ui_MainWindow(object):
         self.brush3D_checkBox.setText(QCoreApplication.translate("MainWindow", u"3D", None))
         self.brushIsotroopic_checkBox.setText(QCoreApplication.translate("MainWindow", u"Isotropic", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Active Label", None))
-        self.botRight_label.setText("")
-        self.botRight_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
-        self.botRightZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
-        self.botRightZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.topLeft_label.setText("")
         self.topLeft_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
         self.topLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.topLeftZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
-        self.botLeft_label.setText("")
-        self.botLeft_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
-        self.botLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
-        self.botLeftZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.topRight_label.setText("")
         self.topRight_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
         self.topRightZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.topRightZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
+        self.botRight_label.setText("")
+        self.botRight_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.botRightZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
+        self.botRightZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
+        self.botLeft_label.setText("")
+        self.botLeft_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.botLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
+        self.botLeftZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.singleTop_graphicsView.setText("")
         self.single_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
         self.singleBot_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))

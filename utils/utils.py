@@ -18,8 +18,7 @@ def initImgParams(img):
     
     return val_win, val_lev, foc_pos, foc_val, min_max, img_size
 
-def cut(small, value, large):
-    
+def clamp(small, value, large):
     return max(small, min(value, large))
 
 def theCrossPen(width=2):
@@ -27,9 +26,6 @@ def theCrossPen(width=2):
     pen = QtGui.QPen()
     pen.setColor(rgb(76, 76, 255))
     pen.setWidth(width)
-    # pen.setStyle(QtCore.Qt.DotLine)
-    length = width 
-    space = width
     dashes = [1, 1]
     pen.setCapStyle(QtCore.Qt.FlatCap)
     pen.setDashPattern(dashes)
@@ -41,7 +37,6 @@ def theBoundaryPen(width=1):
     pen = QtGui.QPen()
     pen.setColor(rgb(0, 0, 0))
     pen.setWidth(width)
-    dashes = [1, 1]
     pen.setCapStyle(QtCore.Qt.FlatCap)
     
     return pen
@@ -62,6 +57,13 @@ def theBrushPen(width=2, lbl=None):
     pen.setCapStyle(QtCore.Qt.FlatCap)
     pen.setDashPattern(dashes)
     
+    return pen
+
+def lettersPen(color):
+
+    pen = QtGui.QPen()
+    pen.setColor(color)
+
     return pen
 
 
