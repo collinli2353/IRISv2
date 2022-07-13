@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowwqvYNs.ui'
+## Form generated from reading UI file 'MainWindowWJnkwB.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -52,6 +52,8 @@ class Ui_MainWindow(object):
         self.actionDice_Score.setObjectName(u"actionDice_Score")
         self.actionAbout_IRIS = QAction(MainWindow)
         self.actionAbout_IRIS.setObjectName(u"actionAbout_IRIS")
+        self.actionDebug = QAction(MainWindow)
+        self.actionDebug.setObjectName(u"actionDebug")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -1095,6 +1097,7 @@ class Ui_MainWindow(object):
         self.menuTools.addAction(self.actionReorient_Image)
         self.menuTools.addAction(self.actionDice_Score)
         self.menuHelp.addAction(self.actionAbout_IRIS)
+        self.menuHelp.addAction(self.actionDebug)
 
         self.retranslateUi(MainWindow)
 
@@ -1133,6 +1136,7 @@ class Ui_MainWindow(object):
         self.actionReorient_Image.setText(QCoreApplication.translate("MainWindow", u"Reorient Image", None))
         self.actionDice_Score.setText(QCoreApplication.translate("MainWindow", u"Dice Score", None))
         self.actionAbout_IRIS.setText(QCoreApplication.translate("MainWindow", u"About IRIS", None))
+        self.actionDebug.setText(QCoreApplication.translate("MainWindow", u"Debug", None))
         self.toolbar4_button.setText(QCoreApplication.translate("MainWindow", u"5", None))
         self.toolbar6_button.setText(QCoreApplication.translate("MainWindow", u"7", None))
         self.toolbar5_button.setText(QCoreApplication.translate("MainWindow", u"6", None))

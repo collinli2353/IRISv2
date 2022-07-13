@@ -1,5 +1,6 @@
 import os
 import sys
+from enum import Enum
 from tkinter.font import BOLD
 
 import nibabel as nib
@@ -10,12 +11,12 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QColor as rgb
 from qt_material import *
 
-from utils.globalConstants import IMG_OBJ, TOOL_OBJ
+from dialogs.reorientImageDialog import ReorientImageDialog
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
+from utils.globalConstants import IMG_OBJ, TOOL_OBJ
 from utils.utils import clamp, lettersPen, theCrossPen
 
-from dialogs.reorientImageDialog import ReorientImageDialog
 
 class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __init__(self):
@@ -53,6 +54,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
         self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
+        self.ui.actionDebug.triggered.connect(self.debug)
 
         # Toolbar actions
         self.ui.toolbar0_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))   
@@ -135,7 +137,15 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def openReorientDialog(self):
         self.reorientDialog.exec()
-    
+
+    def debug(self):
+        print()
+        print('==================================================')
+        print(self.IMG_OBJ)
+        print('==================================================')
+        print(self.TOOL_OBJ)
+        print('==================================================')
+
     # ================================================== #
     # KeyPress Events ================================== #
     # ================================================== #
@@ -150,18 +160,16 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def topLeft_labelMouseMoveEvent(self, event):
         [x, y, z] = [
-            clamp(0, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[1]), self.IMG_OBJ.SHAPE[1]-1),
-            clamp(0, self.IMG_OBJ.SHAPE[0]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[0])),
+            clamp(0, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
+            clamp(0, self.IMG_OBJ.SHAPE[1]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[1])),
             self.IMG_OBJ.FOC_POS[2]
         ]
 
-        # Flip horizontally
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topLeft']][0]:
-            x = self.IMG_OBJ.SHAPE[0] - x - 1
-
-        # Flip vertically
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topLeft']][1]:
-            y = self.IMG_OBJ.SHAPE[1] - y - 1
+        [x, y, z] = [
+            self.IMG_OBJ.SHAPE[0] - x - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topLeft'] ][0] else x,
+            self.IMG_OBJ.SHAPE[1] - y - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topLeft'] ][1] else y,
+            z
+        ]
 
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
@@ -183,13 +191,11 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             clamp(0, int(event.y()/self.ui.topRight_label.height()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
         ]
 
-        # Flip horizontally
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topRight']][0]:
-            y = self.IMG_OBJ.SHAPE[1] - y - 1
-
-        # Flip vertically
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['topRight']][1]:
-            z = self.IMG_OBJ.SHAPE[2] - z - 1
+        [x, y, z] = [
+            x,
+            self.IMG_OBJ.SHAPE[1] - y - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topRight'] ][0] else y,
+            self.IMG_OBJ.SHAPE[2] - z - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topRight'] ][1] else z,
+        ]
 
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
@@ -210,18 +216,16 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def botRight_labelMouseMoveEvent(self, event):
         [x, y, z] = [
-            clamp(0, int(event.y()/self.ui.botRight_label.height()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
+            clamp(0, int(event.x()/self.ui.botRight_label.width()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
             self.IMG_OBJ.FOC_POS[1],
-            clamp(0, int(event.x()/self.ui.botRight_label.width()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
+            clamp(0, int(event.y()/self.ui.botRight_label.height()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
         ]
 
-        # Flip horizontally
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['botRight']][0]:
-            x = self.IMG_OBJ.SHAPE[0] - x - 1
-
-        # Flip vertically
-        if self.IMG_OBJ.FLIP[self.IMG_OBJ.VIEWER_MAPPING['botRight']][1]:
-            z = self.IMG_OBJ.SHAPE[2] - z - 1
+        [x, y, z] = [
+            self.IMG_OBJ.SHAPE[0] - x - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['botRight'] ][0] else x,
+            y,
+            self.IMG_OBJ.SHAPE[2] - z - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['botRight'] ][1] else z,
+        ]
 
         if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
@@ -240,18 +244,18 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # Slider Actions =================================== #
     # ================================================== #
     def topLeft_scrollBarValueChanged(self, value):
-        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']] = value-1
         self.update()
 
     def topRight_scrollBarValueChanged(self, value):
-        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']] = value-1
         self.update()
 
     def botLeft_scrollBarValueChanged(self, value):
         self.update()
 
     def botRight_scrollBarValueChanged(self, value):
-        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']] = value-1
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']] = value-1
         self.update()
 
     # ================================================== #
@@ -284,21 +288,25 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         
 
         for index in range(len(imgs)):
-            axisMappingX, axisMappingY = self.IMG_OBJ.AXISMAPPING[index]
+            [axisMappingX, axisMappingY] = self.IMG_OBJ.AXISMAPPING[index]
 
             multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.IMG_OBJ.TRANS[axisMappingX],
                             (multi_size[1] - multi_newshape[1]) // 2+self.IMG_OBJ.TRANS[axisMappingY])
-            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * multi_size[1], self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * multi_size[0]]
+            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * multi_size[0], self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * multi_size[1]]
             
             # Transform
             ## Flip horizontally
-            if self.IMG_OBJ.FLIP[index][0]:
-                imgs[index] = np.fliplr(imgs[index])
+            if self.IMG_OBJ.IMG_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][0]:
+                imgs[index] = np.flipud(imgs[index])
+
+            if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][0]:
                 scaled_foc_pos2D[0] = multi_size[0] - scaled_foc_pos2D[0]
 
             ## Flip vertically
-            if self.IMG_OBJ.FLIP[index][1]:
-                imgs[index] = np.flipud(imgs[index])
+            if self.IMG_OBJ.IMG_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][1]:
+                imgs[index] = np.fliplr(imgs[index])
+
+            if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][1]:
                 scaled_foc_pos2D[1] = multi_size[1] - scaled_foc_pos2D[1]
 
             i = imgs[index]
@@ -315,45 +323,46 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             painter_img.setPen(theCrossPen())
 
             # Draw cross
-            painter_img.drawLine(0, scaled_foc_pos2D[0], pixmap_img.width(), scaled_foc_pos2D[0])
-            painter_img.drawLine(scaled_foc_pos2D[1], 0, scaled_foc_pos2D[1], pixmap_img.height())
+            painter_img.drawLine(0, scaled_foc_pos2D[1], pixmap_img.width(), scaled_foc_pos2D[1]) # Horizontal
+            painter_img.drawLine(scaled_foc_pos2D[0], 0, scaled_foc_pos2D[0], pixmap_img.height()) # Vertical
 
             painter_img.setPen(lettersPen(rgb(227, 170, 0)))
 
             # Draw letters
-            painter_img.setFont(QtGui.QFont('Robato', 10, QFont.Bold))
-            painter_img.drawText(pixmap_img.width()//2, 15, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][0]) # TOP
-            painter_img.drawText(pixmap_img.width()-15, pixmap_img.height()//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][1]) # RIGHT
-            painter_img.drawText(pixmap_img.width()//2, pixmap_img.height()-5, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][2]) # BOT
-            painter_img.drawText(5, pixmap_img.height()//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][3]) # LEFT
+            size = 10
+            painter_img.setFont(QtGui.QFont('Robato', size, QFont.Bold))
+            painter_img.drawText(pixmap_img.width()//2-size//2, 15, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][0]) # TOP
+            painter_img.drawText(pixmap_img.width()-15, pixmap_img.height()//2+size//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][1]) # RIGHT
+            painter_img.drawText(pixmap_img.width()//2-size//2, pixmap_img.height()-5, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][2]) # BOT
+            painter_img.drawText(5, pixmap_img.height()//2+size//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][3]) # LEFT
             
             painter_img.end()
 
             imgs[index] = pixmap_img
 
 
-        self.ui.topLeft_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['topLeft']])
-        self.ui.topRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['topRight']])
-        self.ui.botRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_MAPPING['botRight']])
+        self.ui.topLeft_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']])
+        self.ui.topRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']])
+        self.ui.botRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']])
 
     def init_scrollBars(self):
         self.ui.topLeft_scrollBar.setMinimum(1)
         self.ui.topRight_scrollBar.setMinimum(1)
         self.ui.botRight_scrollBar.setMinimum(1)
 
-        self.ui.topLeft_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topLeft']])
-        self.ui.topRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topRight']])
-        self.ui.botRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['botRight']])
+        self.ui.topLeft_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']])
+        self.ui.topRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']])
+        self.ui.botRight_scrollBar.setMaximum(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']])
 
     def update_scrollBars(self):
-        self.ui.topLeft_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]+1)
-        self.ui.topRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']]+1)
-        self.ui.botRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']]+1)
+        self.ui.topLeft_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']]+1)
+        self.ui.topRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']]+1)
+        self.ui.botRight_scrollBar.setValue(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]+1)
 
     def update_scrollBarLabels(self):        
-        self.ui.topLeftZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topLeft']]))
-        self.ui.topRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['topRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['topRight']]))
-        self.ui.botRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_MAPPING['botRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_MAPPING['botRight']]))
+        self.ui.topLeftZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']]))
+        self.ui.topRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']]))
+        self.ui.botRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]))
 
     def update_curserLabels(self):
         self.ui.curserX_label.setNum(self.IMG_OBJ.FOC_POS[0]+1)

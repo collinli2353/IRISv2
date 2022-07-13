@@ -1882,6 +1882,7 @@ p, li { white-space: pre-wrap; }
      <string>Help</string>
     </property>
     <addaction name="actionAbout_IRIS"/>
+    <addaction name="actionDebug"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1970,6 +1971,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionAbout_IRIS">
    <property name="text">
     <string>About IRIS</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
    </property>
   </action>
  </widget>

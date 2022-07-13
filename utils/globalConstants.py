@@ -19,12 +19,15 @@ class IMG_OBJ(metaclass=Singleton):
     HEADER = None
     SHAPE = None
     MIN_MAX_INTENSITIES = None
+    WINDOW_LEVEL = None
     LEVEL_VALUE = None
     FOC_POS = None
     ZOOM_FACTOR = None
     TRANS = None
-    FLIP = None
-    RAI_CODE = None
+    IMG_FLIP = None
+    CURSER_FLIP = None
+    ORIG_RAI_CODE = None
+    CURRENT_RAI_CODE = None
     RAI_DISPLAY_LETTERS = None
     AXISMAPPING = None
     VIEWER_MAPPING = None
@@ -45,12 +48,17 @@ class IMG_OBJ(metaclass=Singleton):
         self.FOC_POS = [50, 50, 50]
         self.ZOOM_FACTOR = 1
         self.TRANS = [0, 0, 0]
-        self.FLIP = [
-        #   (fliplr, flipud)
-            [False,  False], 
-            [True,  True],
-            [False,  False],
-        ]
+        self.IMG_FLIP = {
+            'axi': [False, False],
+            'sag': [False, False],
+            'cor': [False, False],
+        }
+        self.CURSER_FLIP = {
+            'axi': [False, False],
+            'sag': [False, False],
+            'cor': [False, False],
+        }
+        self.ORIG_RAI_CODE = None
         self.RAI_CODE = None
         self.RAI_DISPLAY_LETTERS = [
             ['S', 'P', 'I', 'A'],
@@ -58,11 +66,29 @@ class IMG_OBJ(metaclass=Singleton):
             ['A', 'L', 'P', 'R'],
         ]
         self.VIEWER_MAPPING = {
+            'axi': 2,
+            'sag': 0,
+            'cor': 1,
+            'topLeft': 'axi',
+            'topRight': 'sag',
+            'botRight': 'cor',
+            2: 'axi',
+            0: 'sag',
+            1: 'cor',
+        }
+        self.VIEWER_INDEX_MAPPING = {
             'topLeft': 2,
             'topRight': 0,
             'botRight': 1,
         }
-        self.AXISMAPPING = [[2, 1], [0, 2], [1, 0]]
+        self.AXISMAPPING = {
+            'axi': [0, 1],
+            'sag': [1, 2],
+            'cor': [0, 2],
+            2: [0, 1],
+            0: [1, 2],
+            1: [0, 2],
+        }
         self.VIEWER_TYPE = 4
         self.IS_DICOM = False
 
@@ -85,7 +111,65 @@ class IMG_OBJ(metaclass=Singleton):
             self.FOC_POS = [self.SHAPE[0] // 2, self.SHAPE[1] // 2, self.SHAPE[2] // 2]
             self.ZOOM_FACTOR = 1
             self.TRANS = [0, 0, 0]
-            self.RAI_CODE = None
+            self.IMG_FLIP = {
+                'axi': [False, False],
+                'sag': [False, False],
+                'cor': [False, False],
+            }
+            self.CURSER_FLIP = {
+                'axi': [False, False],
+                'sag': [False, False],
+                'cor': [False, False],
+            }
+            self.ORIG_RAI_CODE = nib.aff2axcodes(self.AFFINE, (('R', 'L'), ('P', 'A'), ('I', 'S')))
+            self.CURRENT_RAI_CODE = ('R', 'P', 'I') 
+
+            # Desired RAI code is RPI
+            if self.ORIG_RAI_CODE[0] != 'R':
+                self.IMG_FLIP['axi'][0] = not self.IMG_FLIP['axi'][0] # Flip axial horizontally
+                self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal horizontally
+
+            if self.ORIG_RAI_CODE[1] != 'P':
+                self.IMG_FLIP['axi'][1] = not self.IMG_FLIP['axi'][1] # Flip axial vertically
+                self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital horizontally
+
+            if self.ORIG_RAI_CODE[2] != 'I':
+                self.IMG_FLIP['cor'][1] = not self.IMG_FLIP['cor'][1] # Flip cornal vertically
+                self.IMG_FLIP['sag'][1] = not self.IMG_FLIP['sag'][1] # Flip saggital vertically
+
+            # Desired RAI code is RPI
+            if self.ORIG_RAI_CODE[0] != 'R':
+                self.CURSER_FLIP['axi'][0] = not self.CURSER_FLIP['axi'][0] # Flip axial horizontally
+                self.CURSER_FLIP['cor'][0] = not self.CURSER_FLIP['cor'][0] # Flip cornal horizontally
+
+            if self.ORIG_RAI_CODE[1] != 'P':
+                self.CURSER_FLIP['axi'][1] = not self.CURSER_FLIP['axi'][1] # Flip axial vertically
+                self.CURSER_FLIP['sag'][0] = not self.CURSER_FLIP['sag'][0] # Flip saggital horizontally
+
+            if self.ORIG_RAI_CODE[2] != 'I':
+                self.CURSER_FLIP['cor'][1] = not self.CURSER_FLIP['cor'][1] # Flip cornal vertically
+                self.CURSER_FLIP['sag'][1] = not self.CURSER_FLIP['sag'][1] # Flip saggital vertically
+
+
+    def __str__(self):
+        return f'''
+file_path: {self.FP}
+affine: {self.AFFINE}
+header: {self.HEADER}
+shape: {self.SHAPE}
+min_max_intensities: {self.MIN_MAX_INTENSITIES}
+window_level: {self.WINDOW_LEVEL}
+level_value: {self.LEVEL_VALUE}
+foc_pos: {self.FOC_POS}
+zoom_factor: {self.ZOOM_FACTOR}
+trans: {self.TRANS}
+img flip: {self.IMG_FLIP}
+curser flip: {self.CURSER_FLIP}
+orig rai code: {self.ORIG_RAI_CODE}
+current rai code: {self.CURRENT_RAI_CODE}
+viewer type: {self.VIEWER_TYPE}
+is dicom: {self.IS_DICOM}
+        '''
 
     def FOC_POS_PERCENT(self):
         return [self.FOC_POS[i] / self.SHAPE[i] for i in range(len(self.FOC_POS))]

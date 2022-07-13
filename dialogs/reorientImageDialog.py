@@ -24,7 +24,7 @@ class ReorientImageDialog(PySide6.QtWidgets.QDialog):
         self.ui = Ui_ReorientImage_Widget()
         self.ui.setupUi(self)
 
-        self.IMG_OBJ = IMG_OBJ
+        self.IMG_OBJ = IMG_OBJ()
 
         self.ui.currentVoxelXAxis_comboBox.addItems(self.reorient_choices)
         self.ui.currentVoxelYAxis_comboBox.addItems(self.reorient_choices)
@@ -38,11 +38,22 @@ class ReorientImageDialog(PySide6.QtWidgets.QDialog):
         self.ui.newVoxelYAxis_comboBox.currentTextChanged.connect(self.updateNewVoxelYAxis)
         self.ui.newVoxelZAxis_comboBox.currentTextChanged.connect(self.updateNewVoxelZAxis)
 
-        def flipAxial():
-            self.IMG_OBJ.FLIP[0] = not self.IMG_OBJ.FLIP[0]
-            print(self.IMG_OBJ.FLIP)
+        # def voxelXAxisClicked():
+        #     self.IMG_OBJ.FLIP[2][0] = not self.IMG_OBJ.FLIP[2][0] # Flip axial horizontally
+        #     self.IMG_OBJ.FLIP[1][0] = not self.IMG_OBJ.FLIP[1][0] # Flip cornal horizontally
 
-        self.ui.voxelXAxis_button.clicked.connect(lambda: flipAxial)
+        # def voxelYAxisClicked():
+        #     print(self.IMG_OBJ.FLIP[1])
+        #     self.IMG_OBJ.FLIP[2][1] = not self.IMG_OBJ.FLIP[2][1] # Flip axial vertically
+        #     self.IMG_OBJ.FLIP[0][0] = not self.IMG_OBJ.FLIP[0][0] # Flip saggital horizontally
+
+        # def voxelZAxisClicked():
+        #     self.IMG_OBJ.FLIP[1][1] = not self.IMG_OBJ.FLIP[1][1] # Flip cornal vertically
+        #     self.IMG_OBJ.FLIP[0][1] = not self.IMG_OBJ.FLIP[0][1] # Flip saggital vertically
+
+        # self.ui.voxelXAxis_button.clicked.connect(voxelXAxisClicked)
+        # self.ui.voxelYAxis_button.clicked.connect(voxelYAxisClicked)
+        # self.ui.voxelZAxis_button.clicked.connect(voxelZAxisClicked)
 
         self.ui.newNIFTI_tableView.setHorizontalHeaderLabels(['X', 'Y', 'Z', 'W'])
 
