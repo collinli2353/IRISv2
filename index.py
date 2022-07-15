@@ -10,11 +10,12 @@ from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QColor as rgb
 from qt_material import *
+from ImageProecessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
-from utils.globalConstants import IMG_OBJ, TOOL_OBJ
+from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
 from utils.utils import clamp, lettersPen, theCrossPen
 
 
@@ -57,15 +58,34 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.actionDebug.triggered.connect(self.debug)
 
         # Toolbar actions
-        self.ui.toolbar0_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))   
+        def set_tool(tool_name, index):
+            self.TOOL_OBJ.ACTIVE_TOOL_NAME = tool_name
+            self.TOOL_OBJ.ACTIVE_TOOL_INDEX = index
+
+        self.ui.toolbar0_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.ui.toolbar0_button.clicked.connect(lambda: set_tool('curser', 0))
+        
         self.ui.toolbar1_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.ui.toolbar1_button.clicked.connect(lambda: set_tool('smartclick', 1))
+
         self.ui.toolbar2_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
+        self.ui.toolbar2_button.clicked.connect(lambda: set_tool('levelset', 2))
+
         self.ui.toolbar3_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.ui.toolbar3_button.clicked.connect(lambda: set_tool('zoom', 3))
+
         self.ui.toolbar4_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
+        self.ui.toolbar4_button.clicked.connect(lambda: set_tool('painter', 4))
+
         self.ui.toolbar5_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
+        self.ui.toolbar5_button.clicked.connect(lambda: set_tool('toolbar5', 5))
+
         self.ui.toolbar6_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(6))
+
         self.ui.toolbar7_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(7))
+
         self.ui.toolbar8_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(8))
+
         self.ui.toolbar9_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(9))
 
         # Window actions
@@ -80,7 +100,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.botRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(3, 1))
 
         # QLabel actions
-        # self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
+        self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
         # self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
         # self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
         # self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
@@ -103,8 +123,16 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def __initState__(self):
         self.IMG_OBJ = IMG_OBJ()
+        self.MSK_OBJ = MSK_OBJ()
         self.TOOL_OBJ = TOOL_OBJ()
         self.reorientDialog = ReorientImageDialog()
+
+        self.axi_worker = ImageProcessWorker()
+        self.sag_worker = ImageProcessWorker()
+        self.cor_worker = ImageProcessWorker()
+        self.axi_worker.trigger.connect(self.setAxiPixmap)
+        self.sag_worker.trigger.connect(self.setSagPixmap)
+        self.cor_worker.trigger.connect(self.setCorPixmap)
 
     # ================================================== #
     # Menubar Actions ================================== #
@@ -117,6 +145,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def openImage(self, fp):
         self.IMG_OBJ.__loadImage__(fp)
+        self.MSK_OBJ.MSK = np.zeros(self.IMG_OBJ.SHAPE)
+
+        # TODO: new image, new mask, ask prompt to save old mask
 
         self.init_scrollBars()
         self.update_scrollBars()
@@ -145,10 +176,26 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print('==================================================')
         print(self.TOOL_OBJ)
         print('==================================================')
+        print(self.MSK_OBJ)
+        print('==================================================')
+
 
     # ================================================== #
     # KeyPress Events ================================== #
     # ================================================== #
+    def computePosition(self, ev_x, ev_y, zoom, margin, flip, img_size):
+        new_x, new_y = ev_x - margin[0], ev_y - margin[1]
+        
+        new_foc_pos_2d = [new_x, new_y]
+        new_foc_pos_2d = [int(pos / zoom) for pos in new_foc_pos_2d]
+        new_foc_pos_2d = [clamp(0,val,img_size-1) for val, img_size in zip(new_foc_pos_2d, img_size)]
+
+        for axis, bool_flip in enumerate(flip):
+            if bool_flip:
+                new_foc_pos_2d[axis] = img_size[axis] - new_foc_pos_2d[axis] - 1
+        
+        return new_foc_pos_2d
+
     def keyPressEvent(self, event):
         print(event.key(), 'pressed')
 
@@ -156,57 +203,78 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print(event.key(), 'released')
 
     def resizeEvent(self, event):
-        self.update_multi_viewer()
+        self.update()
+
+    def topLeft_labelMousePressEvent(self, event):
+        self.TOOL_OBJ.INIT_MOUSE_POS['axi'] = [event.x(), event.y()]
+        self.topLeft_labelMouseMoveEvent(event)
+
+    def topRight_labelMousePressEvent(self, event):
+        self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.x(), event.y()]
+        self.topRight_labelMouseMoveEvent(event)
+
+    def botRight_labelMousePressEvent(self, event):
+        self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
+        self.botRight_labelMouseMoveEvent(event)
 
     def topLeft_labelMouseMoveEvent(self, event):
-        [x, y, z] = [
-            clamp(0, int(event.x()/self.ui.topLeft_label.width()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
-            clamp(0, self.IMG_OBJ.SHAPE[1]-1, int(event.y()/self.ui.topLeft_label.height()*self.IMG_OBJ.SHAPE[1])),
-            self.IMG_OBJ.FOC_POS[2]
-        ]
+        [x, y] = self.computePosition(
+            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+            self.IMG_OBJ.MARGIN['axi'],
+            self.IMG_OBJ.IMG_FLIP['axi'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[1]]
+            )
+        [x, y, z] = [x, y, self.IMG_OBJ.FOC_POS[2]]
 
-        [x, y, z] = [
-            self.IMG_OBJ.SHAPE[0] - x - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topLeft'] ][0] else x,
-            self.IMG_OBJ.SHAPE[1] - y - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topLeft'] ][1] else y,
-            z
-        ]
-
-        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
                 self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                pass
+                diff = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][1] - event.y()
+                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
+                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
 
             elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                pass            
+                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][0] - event.x()
+                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][1] - event.y()
+                self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
+
+        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
+
+        self.TOOL_OBJ.INIT_MOUSE_POS['axi'] = [event.x(), event.y()]
 
         self.update_scrollBars()
         self.update()
 
     def topRight_labelMouseMoveEvent(self, event):
-        [x, y, z] = [
-            self.IMG_OBJ.FOC_POS[0],
-            clamp(0, int(event.x()/self.ui.topRight_label.width()*self.IMG_OBJ.SHAPE[1]), self.IMG_OBJ.SHAPE[1]-1),
-            clamp(0, int(event.y()/self.ui.topRight_label.height()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
-        ]
+        [x, y] = self.computePosition(
+            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+            self.IMG_OBJ.MARGIN['sag'],
+            self.IMG_OBJ.IMG_FLIP['sag'], [self.IMG_OBJ.SHAPE[1], self.IMG_OBJ.SHAPE[2]]
+            )
+        [x, y, z] = [self.IMG_OBJ.FOC_POS[0], x, y]
 
-        [x, y, z] = [
-            x,
-            self.IMG_OBJ.SHAPE[1] - y - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topRight'] ][0] else y,
-            self.IMG_OBJ.SHAPE[2] - z - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['topRight'] ][1] else z,
-        ]
-
-        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
                 self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                pass
+                diff = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][1] - event.y()
+                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
+                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
 
             elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                pass
-        
+                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][0] - event.x()
+                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][1] - event.y()
+                self.IMG_OBJ.SHIFT = [0, self.IMG_OBJ.SHIFT[1] - diffX, self.IMG_OBJ.SHIFT[2] - diffY]
+
+        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
+
+        self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.x(), event.y()]
 
         self.update_scrollBars()
         self.update()
@@ -215,27 +283,32 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print('botLeft_labelMousePressEvent', event.x(), event.y())
 
     def botRight_labelMouseMoveEvent(self, event):
-        [x, y, z] = [
-            clamp(0, int(event.x()/self.ui.botRight_label.width()*self.IMG_OBJ.SHAPE[0]), self.IMG_OBJ.SHAPE[0]-1),
-            self.IMG_OBJ.FOC_POS[1],
-            clamp(0, int(event.y()/self.ui.botRight_label.height()*self.IMG_OBJ.SHAPE[2]), self.IMG_OBJ.SHAPE[2]-1),
-        ]
+        [x, y] = self.computePosition(
+            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+            self.IMG_OBJ.MARGIN['cor'],
+            self.IMG_OBJ.IMG_FLIP['cor'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[2]]
+            )
+        [x, y, z] = [x, self.IMG_OBJ.FOC_POS[1], y]
 
-        [x, y, z] = [
-            self.IMG_OBJ.SHAPE[0] - x - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['botRight'] ][0] else x,
-            y,
-            self.IMG_OBJ.SHAPE[2] - z - 1 if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING['botRight'] ][1] else z,
-        ]
-
-        if TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
+        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
             if event.buttons() & PySide6.QtCore.Qt.LeftButton:
                 self.IMG_OBJ.FOC_POS = [x, y, z]
 
             elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                pass
+                diff = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][1] - event.y()
+                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
+                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
 
             elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                pass
+                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][0] - event.x()
+                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][1] - event.y()
+                self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, 0, self.IMG_OBJ.SHIFT[2] - diffY]
+
+        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
+            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
+                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
+
+        self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
 
         self.update_scrollBars()
         self.update()
@@ -265,6 +338,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.update_scrollBarLabels()
         self.update_curserLabels()
         if self.IMG_OBJ.VIEWER_TYPE == 4:
+            # All label should be same size
+
             self.update_multi_viewer()
         else:
             self.update_single_viewer()
@@ -272,78 +347,48 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def update_single_viewer(self):
         print('update_single_viewer', self.IMG_OBJ.VIEWER_TYPE)
 
-    # TODO: Multithread this operation
     def update_multi_viewer(self):
         x, y, z = self.IMG_OBJ.FOC_POS
-        x_img = self.IMG_OBJ.NP_IMG[x, :, :]
-        y_img = self.IMG_OBJ.NP_IMG[:, y, :]
-        z_img = self.IMG_OBJ.NP_IMG[:, :, z]
-
-        imgs = [x_img, y_img, z_img]
-
-        # All label should be same size
         multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
-        multi_newshape = (round(multi_size[0] * self.IMG_OBJ.ZOOM_FACTOR),
-                         (round(multi_size[1] * self.IMG_OBJ.ZOOM_FACTOR)))
+        self.axi_worker.setArguments(
+            self.IMG_OBJ.NP_IMG[:, :, z], self.MSK_OBJ.MSK[:, :, z], self.MSK_OBJ.OPA,
+            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
+            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][1]]], [0, 0],
+            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['axi'], self.IMG_OBJ.ZOOM_FACTOR, 
+            multi_size,
+        )
+        self.sag_worker.setArguments(
+            self.IMG_OBJ.NP_IMG[x, :, :], self.MSK_OBJ.MSK[x, :, :], self.MSK_OBJ.OPA,
+            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
+            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][1]]], [0, 0],
+            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['sag'], self.IMG_OBJ.ZOOM_FACTOR, 
+            multi_size,
+        )
+        self.cor_worker.setArguments(
+            self.IMG_OBJ.NP_IMG[:, y, :], self.MSK_OBJ.MSK[:, y, :], self.MSK_OBJ.OPA,
+            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
+            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][1]]], [0, 0],
+            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['cor'], self.IMG_OBJ.ZOOM_FACTOR, 
+            multi_size,
+        )
+        self.axi_worker.start()
+        self.sag_worker.start()
+        self.cor_worker.start()
+
+    def setAxiPixmap(self, obj):
+        pixmap = obj['pixmap']
+        self.IMG_OBJ.MARGIN['axi'] = obj['margin']
+        self.ui.topLeft_label.setPixmap(pixmap)
+
+    def setSagPixmap(self, obj):
+        pixmap = obj['pixmap']
+        self.IMG_OBJ.MARGIN['sag'] = obj['margin']
+        self.ui.topRight_label.setPixmap(pixmap)
         
-
-        for index in range(len(imgs)):
-            [axisMappingX, axisMappingY] = self.IMG_OBJ.AXISMAPPING[index]
-
-            multi_margin = ((multi_size[0] - multi_newshape[0]) // 2+self.IMG_OBJ.TRANS[axisMappingX],
-                            (multi_size[1] - multi_newshape[1]) // 2+self.IMG_OBJ.TRANS[axisMappingY])
-            scaled_foc_pos2D = [self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingX] * multi_size[0], self.IMG_OBJ.FOC_POS_PERCENT()[axisMappingY] * multi_size[1]]
-            
-            # Transform
-            ## Flip horizontally
-            if self.IMG_OBJ.IMG_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][0]:
-                imgs[index] = np.flipud(imgs[index])
-
-            if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][0]:
-                scaled_foc_pos2D[0] = multi_size[0] - scaled_foc_pos2D[0]
-
-            ## Flip vertically
-            if self.IMG_OBJ.IMG_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][1]:
-                imgs[index] = np.fliplr(imgs[index])
-
-            if self.IMG_OBJ.CURSER_FLIP[ self.IMG_OBJ.VIEWER_MAPPING[index] ][1]:
-                scaled_foc_pos2D[1] = multi_size[1] - scaled_foc_pos2D[1]
-
-            i = imgs[index]
-            i = np.stack([i.T, i.T, i.T], axis=-1)
-            i = (i * 255).astype(np.uint8)
-            i = Image.fromarray(i, mode='RGB')
-            scaled_img = i.resize(multi_newshape, resample=Image.NEAREST)
-            final_img = Image.new(i.mode, multi_size, color='black')
-            final_img.paste(scaled_img, multi_margin)
-            final_img = ImageQt.ImageQt(final_img.convert('RGBA'))
-            pixmap_img = PySide6.QtGui.QPixmap.fromImage(final_img)         
-
-            painter_img = PySide6.QtGui.QPainter(pixmap_img)
-            painter_img.setPen(theCrossPen())
-
-            # Draw cross
-            painter_img.drawLine(0, scaled_foc_pos2D[1], pixmap_img.width(), scaled_foc_pos2D[1]) # Horizontal
-            painter_img.drawLine(scaled_foc_pos2D[0], 0, scaled_foc_pos2D[0], pixmap_img.height()) # Vertical
-
-            painter_img.setPen(lettersPen(rgb(227, 170, 0)))
-
-            # Draw letters
-            size = 10
-            painter_img.setFont(QtGui.QFont('Robato', size, QFont.Bold))
-            painter_img.drawText(pixmap_img.width()//2-size//2, 15, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][0]) # TOP
-            painter_img.drawText(pixmap_img.width()-15, pixmap_img.height()//2+size//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][1]) # RIGHT
-            painter_img.drawText(pixmap_img.width()//2-size//2, pixmap_img.height()-5, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][2]) # BOT
-            painter_img.drawText(5, pixmap_img.height()//2+size//2, self.IMG_OBJ.RAI_DISPLAY_LETTERS[index][3]) # LEFT
-            
-            painter_img.end()
-
-            imgs[index] = pixmap_img
-
-
-        self.ui.topLeft_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']])
-        self.ui.topRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']])
-        self.ui.botRight_label.setPixmap(imgs[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']])
+    def setCorPixmap(self, obj):
+        pixmap = obj['pixmap']
+        self.IMG_OBJ.MARGIN['cor'] = obj['margin']
+        self.ui.botRight_label.setPixmap(pixmap)
 
     def init_scrollBars(self):
         self.ui.topLeft_scrollBar.setMinimum(1)

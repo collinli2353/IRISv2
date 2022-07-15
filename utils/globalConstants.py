@@ -15,6 +15,7 @@ class IMG_OBJ(metaclass=Singleton):
     NIBABEL_IMG = None
     ORIG_NP_IMG = None
     NP_IMG = None
+    MARGIN = None
     AFFINE = None
     HEADER = None
     SHAPE = None
@@ -23,7 +24,7 @@ class IMG_OBJ(metaclass=Singleton):
     LEVEL_VALUE = None
     FOC_POS = None
     ZOOM_FACTOR = None
-    TRANS = None
+    SHIFT = None
     IMG_FLIP = None
     CURSER_FLIP = None
     ORIG_RAI_CODE = None
@@ -39,6 +40,11 @@ class IMG_OBJ(metaclass=Singleton):
         self.NIBABEL_IMG = None
         self.ORIG_NP_IMG = np.zeros([100, 100, 100])
         self.NP_IMG = np.zeros([100, 100, 100])
+        self.MARGIN = {
+            'axi': [0, 0],
+            'sag': [0, 0],
+            'cor': [0, 0],
+        }
         self.AFFINE = None
         self.HEADER = None
         self.SHAPE = (100, 100, 100)
@@ -47,7 +53,7 @@ class IMG_OBJ(metaclass=Singleton):
         self.LEVEL_VALUE = 0
         self.FOC_POS = [50, 50, 50]
         self.ZOOM_FACTOR = 1
-        self.TRANS = [0, 0, 0]
+        self.SHIFT = [0, 0, 0]
         self.IMG_FLIP = {
             'axi': [False, False],
             'sag': [False, False],
@@ -102,6 +108,11 @@ class IMG_OBJ(metaclass=Singleton):
             self.NIBABEL_IMG = nib.load(fp)
             self.ORIG_NP_IMG = self.NIBABEL_IMG.get_fdata()
             self.NP_IMG = (self.ORIG_NP_IMG - self.ORIG_NP_IMG.min()) / (self.ORIG_NP_IMG.max() - self.ORIG_NP_IMG.min())
+            self.MARGIN = {
+                'axi': [0, 0],
+                'sag': [0, 0],
+                'cor': [0, 0],
+            }
             self.AFFINE = self.NIBABEL_IMG.affine
             self.HEADER = self.NIBABEL_IMG.header
             self.SHAPE = self.ORIG_NP_IMG.shape
@@ -110,7 +121,7 @@ class IMG_OBJ(metaclass=Singleton):
             self.LEVEL_VALUE = self.ORIG_NP_IMG.mean()
             self.FOC_POS = [self.SHAPE[0] // 2, self.SHAPE[1] // 2, self.SHAPE[2] // 2]
             self.ZOOM_FACTOR = 1
-            self.TRANS = [0, 0, 0]
+            self.SHIFT = [0, 0, 0]
             self.IMG_FLIP = {
                 'axi': [False, False],
                 'sag': [False, False],
@@ -126,34 +137,35 @@ class IMG_OBJ(metaclass=Singleton):
 
             # Desired RAI code is RPI
             if self.ORIG_RAI_CODE[0] != 'R':
-                self.IMG_FLIP['axi'][0] = not self.IMG_FLIP['axi'][0] # Flip axial horizontally
-                self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal horizontally
+                self.IMG_FLIP['axi'][1] = not self.IMG_FLIP['axi'][1] # Flip axial horizontally
+                self.IMG_FLIP['cor'][1] = not self.IMG_FLIP['cor'][1] # Flip cornal horizontally
 
             if self.ORIG_RAI_CODE[1] != 'P':
-                self.IMG_FLIP['axi'][1] = not self.IMG_FLIP['axi'][1] # Flip axial vertically
-                self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital horizontally
+                self.IMG_FLIP['axi'][0] = not self.IMG_FLIP['axi'][0] # Flip axial vertically
+                self.IMG_FLIP['sag'][1] = not self.IMG_FLIP['sag'][1] # Flip saggital horizontally
 
             if self.ORIG_RAI_CODE[2] != 'I':
-                self.IMG_FLIP['cor'][1] = not self.IMG_FLIP['cor'][1] # Flip cornal vertically
-                self.IMG_FLIP['sag'][1] = not self.IMG_FLIP['sag'][1] # Flip saggital vertically
+                self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal vertically
+                self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital vertically
 
             # Desired RAI code is RPI
             if self.ORIG_RAI_CODE[0] != 'R':
-                self.CURSER_FLIP['axi'][0] = not self.CURSER_FLIP['axi'][0] # Flip axial horizontally
-                self.CURSER_FLIP['cor'][0] = not self.CURSER_FLIP['cor'][0] # Flip cornal horizontally
+                self.CURSER_FLIP['axi'][1] = not self.CURSER_FLIP['axi'][1] # Flip axial horizontally
+                self.CURSER_FLIP['cor'][1] = not self.CURSER_FLIP['cor'][1] # Flip cornal horizontally
 
             if self.ORIG_RAI_CODE[1] != 'P':
-                self.CURSER_FLIP['axi'][1] = not self.CURSER_FLIP['axi'][1] # Flip axial vertically
-                self.CURSER_FLIP['sag'][0] = not self.CURSER_FLIP['sag'][0] # Flip saggital horizontally
+                self.CURSER_FLIP['axi'][0] = not self.CURSER_FLIP['axi'][0] # Flip axial vertically
+                self.CURSER_FLIP['sag'][1] = not self.CURSER_FLIP['sag'][1] # Flip saggital horizontally
 
             if self.ORIG_RAI_CODE[2] != 'I':
-                self.CURSER_FLIP['cor'][1] = not self.CURSER_FLIP['cor'][1] # Flip cornal vertically
-                self.CURSER_FLIP['sag'][1] = not self.CURSER_FLIP['sag'][1] # Flip saggital vertically
+                self.CURSER_FLIP['cor'][0] = not self.CURSER_FLIP['cor'][0] # Flip cornal vertically
+                self.CURSER_FLIP['sag'][0] = not self.CURSER_FLIP['sag'][0] # Flip saggital vertically
 
 
     def __str__(self):
         return f'''
 file_path: {self.FP}
+margin: {self.MARGIN}
 affine: {self.AFFINE}
 header: {self.HEADER}
 shape: {self.SHAPE}
@@ -162,7 +174,7 @@ window_level: {self.WINDOW_LEVEL}
 level_value: {self.LEVEL_VALUE}
 foc_pos: {self.FOC_POS}
 zoom_factor: {self.ZOOM_FACTOR}
-trans: {self.TRANS}
+shift: {self.SHIFT}
 img flip: {self.IMG_FLIP}
 curser flip: {self.CURSER_FLIP}
 orig rai code: {self.ORIG_RAI_CODE}
@@ -174,6 +186,47 @@ is dicom: {self.IS_DICOM}
     def FOC_POS_PERCENT(self):
         return [self.FOC_POS[i] / self.SHAPE[i] for i in range(len(self.FOC_POS))]
 
+class MSK_OBJ(metaclass=Singleton):
+    MSK = None
+    OPA = None
+    LBL_IDS = [0]
+    CURRENT_LBL = 1
+
+    def __init__(self):
+        self.MSK = np.zeros([100, 100, 100])
+        self.OPA = 50
+        self.LBL_IDS = [0]
+        CURRENT_LBL = 1
+
+    def newMsk(self, msk):
+        self.MSK = msk
+        self.OPA = 50
+        CURRENT_LBL = 1
+
+    def __str__(self):
+        return f'''
+opa: {self.OPA}
+lbl ids: {np.unique(self.MSK)}
+        '''
+
 class TOOL_OBJ(metaclass=Singleton):
-    ACTIVE_TOOL = 0
-    ACTIVE_TOOL_NAME = 'curser'
+    ACTIVE_TOOL_INDEX = None
+    ACTIVE_TOOL_NAME = None
+    TOOL_SHAPE = None
+    INIT_MOUSE_POS = None
+
+    def __init__(self):
+        self.ACTIVE_TOOL_INDEX = 0
+        self.ACTIVE_TOOL_NAME = 'curser'
+        self.TOOL_SHAPE = [5, 5]
+        self.INIT_MOUSE_POS = {
+            'axi': [0, 0],
+            'sag': [0, 0],
+            'cor': [0, 0],
+        }
+
+    def __str__(self):
+        return f'''
+active tool index: {self.ACTIVE_TOOL_INDEX}
+active tool name: {self.ACTIVE_TOOL_NAME}
+        '''
