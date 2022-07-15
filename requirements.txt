@@ -1,0 +1,29 @@
+altgraph @ file:///home/conda/feedstock_root/build_artifacts/altgraph_1651001670556/work
+certifi==2022.6.15
+click==7.1.2
+future @ file:///D:/bld/future_1649010314844/work
+Jinja2==3.1.2
+macholib @ file:///home/conda/feedstock_root/build_artifacts/macholib_1651023366976/work
+MarkupSafe==2.1.1
+nibabel==4.0.1
+numpy==1.23.1
+packaging==21.3
+pefile @ file:///home/conda/feedstock_root/build_artifacts/pefile_1653943763999/work
+Pillow==9.2.0
+pip-chill==1.0.1
+pyinstaller @ file:///D:/bld/pyinstaller_1653166803730/work
+pyinstaller-hooks-contrib @ file:///home/conda/feedstock_root/build_artifacts/pyinstaller-hooks-contrib_1657388078473/work
+pyparsing==3.0.9
+PyQt6==6.3.1
+PyQt6-Qt6==6.3.1
+PyQt6-sip==13.4.0
+PySide6==6.3.1
+PySide6-Addons==6.3.1
+PySide6-Essentials==6.3.1
+pywin32==303
+pywin32-ctypes @ file:///D:/bld/pywin32-ctypes_1648607976563/work
+qt-material==2.12
+qt6-applications==6.1.0.2.2
+qt6-tools==6.1.0.1.2
+shiboken6==6.3.1
+wincertstore==0.2

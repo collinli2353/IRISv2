@@ -3,9 +3,10 @@ from collections import OrderedDict
 import numpy as np
 from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtGui import QColor as rgb
 
 from utils.colorTable import mapLabelsToColors
-from utils.utils import theBrushPen, theCrossPen
+from utils.utils import lettersPen, theBrushPen, theCrossPen
 
 
 class ImageProcessWorker(QtCore.QThread):
@@ -20,7 +21,8 @@ class ImageProcessWorker(QtCore.QThread):
                      img, msk, opa,
                      foc_pos_2d, shift_2d, point_pos_2d,
                      val_win, val_lev,
-                     img_flip, zoom, viewer_size
+                     img_flip, zoom, viewer_size,
+                     rai_display_letters
                      ):
 
         self.args = OrderedDict({
@@ -35,6 +37,7 @@ class ImageProcessWorker(QtCore.QThread):
             'img_flip': img_flip,
             'zoom': zoom,
             'viewer_size': viewer_size,
+            'rai_display_letters': rai_display_letters
         })
 
     def transform(self, img, msk, foc_pos_2d, img_flip):
@@ -43,6 +46,7 @@ class ImageProcessWorker(QtCore.QThread):
             if bool_flip:
                 img = np.flip(img, axis)
                 msk = np.flip(msk, axis)
+                print('flipping', img_flip)
 
                 foc_pos_2d[axis] = img_size[axis] - foc_pos_2d[axis] - 1
 
@@ -66,7 +70,7 @@ class ImageProcessWorker(QtCore.QThread):
 
     def run(self):
 
-        img, msk, opa, foc_pos_2d, point_pos_2d, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size = self.args.values()
+        img, msk, opa, foc_pos_2d, point_pos_2d, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
 
         # val_max = val_lev + val_win / 2
         # val_min = val_lev - val_win / 2
@@ -113,6 +117,15 @@ class ImageProcessWorker(QtCore.QThread):
                          int(margin[0]+newshape[0]), int(new_foc[1]+spacing/2))
         painter.drawLine(int(new_foc[0]+spacing/2), int(margin[1]),
                          int(new_foc[0]+spacing/2), int(margin[1]+newshape[1]))
+
+        painter.setPen(lettersPen(rgb(227, 170, 0)))
+        size = 10
+        painter.setFont(QtGui.QFont('Robato', size, QtGui.QFont.Bold))
+        painter.drawText(pixmap.width()//2-size//2, 15, rai_display_letters[0]) # TOP
+        painter.drawText(pixmap.width()-15, pixmap.height()//2+size//2, rai_display_letters[1]) # RIGHT
+        painter.drawText(pixmap.width()//2-size//2, pixmap.height()-5, rai_display_letters[2]) # BOT
+        painter.drawText(5, pixmap.height()//2+size//2, rai_display_letters[3]) # LEFT
+
         painter.end()
 
         self.trigger.emit({'pixmap': pixmap, 'margin': margin})

@@ -26,7 +26,6 @@ class IMG_OBJ(metaclass=Singleton):
     ZOOM_FACTOR = None
     SHIFT = None
     IMG_FLIP = None
-    CURSER_FLIP = None
     ORIG_RAI_CODE = None
     CURRENT_RAI_CODE = None
     RAI_DISPLAY_LETTERS = None
@@ -55,11 +54,6 @@ class IMG_OBJ(metaclass=Singleton):
         self.ZOOM_FACTOR = 1
         self.SHIFT = [0, 0, 0]
         self.IMG_FLIP = {
-            'axi': [False, False],
-            'sag': [False, False],
-            'cor': [False, False],
-        }
-        self.CURSER_FLIP = {
             'axi': [False, False],
             'sag': [False, False],
             'cor': [False, False],
@@ -127,11 +121,6 @@ class IMG_OBJ(metaclass=Singleton):
                 'sag': [False, False],
                 'cor': [False, False],
             }
-            self.CURSER_FLIP = {
-                'axi': [False, False],
-                'sag': [False, False],
-                'cor': [False, False],
-            }
             self.ORIG_RAI_CODE = nib.aff2axcodes(self.AFFINE, (('R', 'L'), ('P', 'A'), ('I', 'S')))
             self.CURRENT_RAI_CODE = ('R', 'P', 'I') 
 
@@ -148,19 +137,6 @@ class IMG_OBJ(metaclass=Singleton):
                 self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal vertically
                 self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital vertically
 
-            # Desired RAI code is RPI
-            if self.ORIG_RAI_CODE[0] != 'R':
-                self.CURSER_FLIP['axi'][1] = not self.CURSER_FLIP['axi'][1] # Flip axial horizontally
-                self.CURSER_FLIP['cor'][1] = not self.CURSER_FLIP['cor'][1] # Flip cornal horizontally
-
-            if self.ORIG_RAI_CODE[1] != 'P':
-                self.CURSER_FLIP['axi'][0] = not self.CURSER_FLIP['axi'][0] # Flip axial vertically
-                self.CURSER_FLIP['sag'][1] = not self.CURSER_FLIP['sag'][1] # Flip saggital horizontally
-
-            if self.ORIG_RAI_CODE[2] != 'I':
-                self.CURSER_FLIP['cor'][0] = not self.CURSER_FLIP['cor'][0] # Flip cornal vertically
-                self.CURSER_FLIP['sag'][0] = not self.CURSER_FLIP['sag'][0] # Flip saggital vertically
-
 
     def __str__(self):
         return f'''
@@ -176,7 +152,6 @@ foc_pos: {self.FOC_POS}
 zoom_factor: {self.ZOOM_FACTOR}
 shift: {self.SHIFT}
 img flip: {self.IMG_FLIP}
-curser flip: {self.CURSER_FLIP}
 orig rai code: {self.ORIG_RAI_CODE}
 current rai code: {self.CURRENT_RAI_CODE}
 viewer type: {self.VIEWER_TYPE}

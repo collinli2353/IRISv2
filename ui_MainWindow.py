@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowWJnkwB.ui'
+## Form generated from reading UI file 'MainWindowNIVGnG.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -220,8 +220,26 @@ class Ui_MainWindow(object):
 
         self.frame_4 = QFrame(self.curser_widget_0)
         self.frame_4.setObjectName(u"frame_4")
+        self.frame_4.setMaximumSize(QSize(16777215, 35))
         self.frame_4.setFrameShape(QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame_4)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.minIntensity_label = QLabel(self.frame_4)
+        self.minIntensity_label.setObjectName(u"minIntensity_label")
+
+        self.horizontalLayout_9.addWidget(self.minIntensity_label)
+
+        self.maxIntensity_label = QLabel(self.frame_4)
+        self.maxIntensity_label.setObjectName(u"maxIntensity_label")
+
+        self.horizontalLayout_9.addWidget(self.maxIntensity_label)
+
+        self.curIntensity_label = QLabel(self.frame_4)
+        self.curIntensity_label.setObjectName(u"curIntensity_label")
+
+        self.horizontalLayout_9.addWidget(self.curIntensity_label)
+
 
         self.verticalLayout_2.addWidget(self.frame_4)
 
@@ -994,58 +1012,6 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.botLeft_frame, 1, 0, 1, 1)
 
         self.viewer_stackedWidget.addWidget(self.multiViewer)
-        self.singleViewer = QWidget()
-        self.singleViewer.setObjectName(u"singleViewer")
-        self.verticalLayout_14 = QVBoxLayout(self.singleViewer)
-        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
-        self.singleTop_layout = QHBoxLayout()
-        self.singleTop_layout.setObjectName(u"singleTop_layout")
-        self.singleTop_graphicsView = QLabel(self.singleViewer)
-        self.singleTop_graphicsView.setObjectName(u"singleTop_graphicsView")
-
-        self.singleTop_layout.addWidget(self.singleTop_graphicsView)
-
-        self.singleTop_frame = QVBoxLayout()
-        self.singleTop_frame.setObjectName(u"singleTop_frame")
-        self.single_button = QPushButton(self.singleViewer)
-        self.single_button.setObjectName(u"single_button")
-        self.single_button.setMaximumSize(QSize(25, 25))
-
-        self.singleTop_frame.addWidget(self.single_button)
-
-        self.singleTop_scrollBar = QScrollBar(self.singleViewer)
-        self.singleTop_scrollBar.setObjectName(u"singleTop_scrollBar")
-        self.singleTop_scrollBar.setMaximumSize(QSize(25, 16777215))
-        self.singleTop_scrollBar.setOrientation(Qt.Vertical)
-
-        self.singleTop_frame.addWidget(self.singleTop_scrollBar)
-
-
-        self.singleTop_layout.addLayout(self.singleTop_frame)
-
-
-        self.verticalLayout_14.addLayout(self.singleTop_layout)
-
-        self.singleBot_layout = QHBoxLayout()
-        self.singleBot_layout.setObjectName(u"singleBot_layout")
-        self.singleBot_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.singleBot_layout.addItem(self.singleBot_spacer)
-
-        self.singleBot_button = QPushButton(self.singleViewer)
-        self.singleBot_button.setObjectName(u"singleBot_button")
-
-        self.singleBot_layout.addWidget(self.singleBot_button)
-
-        self.singleBot_label = QLabel(self.singleViewer)
-        self.singleBot_label.setObjectName(u"singleBot_label")
-
-        self.singleBot_layout.addWidget(self.singleBot_label)
-
-
-        self.verticalLayout_14.addLayout(self.singleBot_layout)
-
-        self.viewer_stackedWidget.addWidget(self.singleViewer)
 
         self.right_frame_2.addWidget(self.viewer_stackedWidget, 0, 0, 1, 1)
 
@@ -1152,6 +1118,9 @@ class Ui_MainWindow(object):
         self.curserY_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
         self.curserZ_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
         self.curserIntensity_label.setText(QCoreApplication.translate("MainWindow", u"Intensity (min,max,cur):", None))
+        self.minIntensity_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
+        self.maxIntensity_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
+        self.curIntensity_label.setText(QCoreApplication.translate("MainWindow", u"#", None))
         self.smartClickType_label.setText(QCoreApplication.translate("MainWindow", u"SmartClick Type", None))
         self.smartClickType2D_button.setText(QCoreApplication.translate("MainWindow", u"2D", None))
         self.smartClickType3D_button.setText(QCoreApplication.translate("MainWindow", u"3D", None))
@@ -1208,21 +1177,17 @@ class Ui_MainWindow(object):
         self.topLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.topLeftZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.topRight_label.setText("")
-        self.topRight_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.topRight_button.setText(QCoreApplication.translate("MainWindow", u"S", None))
         self.topRightZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.topRightZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.botRight_label.setText("")
-        self.botRight_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.botRight_button.setText(QCoreApplication.translate("MainWindow", u"C", None))
         self.botRightZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.botRightZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.botLeft_label.setText("")
-        self.botLeft_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.botLeft_button.setText("")
         self.botLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
         self.botLeftZoomToFit_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
-        self.singleTop_graphicsView.setText("")
-        self.single_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
-        self.singleBot_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))
-        self.singleBot_label.setText(QCoreApplication.translate("MainWindow", u"# of #", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuSave_Segmentation.setTitle(QCoreApplication.translate("MainWindow", u"Save Segmentation", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))

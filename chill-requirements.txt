@@ -1,0 +1,12 @@
+certifi
+macholib
+nibabel
+pillow
+pip-chill
+pyinstaller
+pyqt6
+pyside6
+pywin32
+qt-material
+qt6-tools
+wincertstore

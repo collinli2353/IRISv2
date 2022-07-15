@@ -54,6 +54,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
+        self.ui.actionSave_As.triggered.connect(self.saveAsImageAction)
         self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
         self.ui.actionDebug.triggered.connect(self.debug)
 
@@ -89,21 +90,65 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.toolbar9_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(9))
 
         # Window actions
-        def set_viewer_stackedWidget_index(viewerTypeIndex, stackedWidgetIndex):
-            self.IMG_OBJ.VIEWER_TYPE = viewerTypeIndex
-            self.ui.viewer_stackedWidget.setCurrentIndex(stackedWidgetIndex)
 
-        self.ui.single_button.clicked.connect(lambda: set_viewer_stackedWidget_index(4, 0))
-        self.ui.topLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(0, 1))
-        self.ui.topRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(1, 1))
-        self.ui.botLeft_button.clicked.connect(lambda: set_viewer_stackedWidget_index(2, 1))
-        self.ui.botRight_button.clicked.connect(lambda: set_viewer_stackedWidget_index(3, 1))
+        def show_all_frames():
+            self.ui.topLeft_frame.show()
+            self.ui.topRight_frame.show()
+            self.ui.botLeft_frame.show()
+            self.ui.botRight_frame.show()
+            self.IMG_OBJ.VIEWER_TYPE = 4
+
+        def show_topLeft_frame():
+            if self.IMG_OBJ.VIEWER_TYPE == 4:
+                self.ui.topLeft_frame.show()
+                self.ui.topRight_frame.hide()
+                self.ui.botLeft_frame.hide()
+                self.ui.botRight_frame.hide()
+                self.IMG_OBJ.VIEWER_TYPE = 0
+            else:
+                show_all_frames()
+                
+
+        def show_topRight_frame():
+            if self.IMG_OBJ.VIEWER_TYPE == 4:
+                self.ui.topLeft_frame.hide()
+                self.ui.topRight_frame.show()
+                self.ui.botLeft_frame.hide()
+                self.ui.botRight_frame.hide()
+                self.IMG_OBJ.VIEWER_TYPE = 1
+            else:
+                show_all_frames()
+
+        def show_botLeft_frame():
+            if self.IMG_OBJ.VIEWER_TYPE == 4:
+                self.ui.topLeft_frame.hide()
+                self.ui.topRight_frame.hide()
+                self.ui.botLeft_frame.show()
+                self.ui.botRight_frame.hide()
+                self.IMG_OBJ.VIEWER_TYPE = 2
+            else:
+                show_all_frames()
+
+        def show_botRight_frame():
+            if self.IMG_OBJ.VIEWER_TYPE == 4:
+                self.ui.topLeft_frame.hide()
+                self.ui.topRight_frame.hide()
+                self.ui.botLeft_frame.hide()
+                self.ui.botRight_frame.show()
+                self.IMG_OBJ.VIEWER_TYPE = 3
+            else:
+                show_all_frames()
+                
+        self.ui.topLeft_button.clicked.connect(lambda: show_topLeft_frame())
+        self.ui.topRight_button.clicked.connect(lambda: show_topRight_frame())
+        self.ui.botLeft_button.clicked.connect(lambda: show_botLeft_frame())
+        self.ui.botRight_button.clicked.connect(lambda: show_botRight_frame())
 
         # QLabel actions
         self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
-        # self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
-        # self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
-        # self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
+        self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
+        self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
+        self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
 
         self.ui.topLeft_label.mouseMoveEvent = self.topLeft_labelMouseMoveEvent
         self.ui.topRight_label.mouseMoveEvent = self.topRight_labelMouseMoveEvent
@@ -138,7 +183,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # Menubar Actions ================================== #
     # ================================================== #
     def openImageAction(self):
-        fp = self.getValidFilePath()[0]
+        fp = self.getValidFilePath(prompt='Open Image', is_save=False)[0]
         if not fp:
             return
         self.openImage(fp)
@@ -165,6 +210,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             caption=prompt,
             filter=filter,
         )
+
+    def saveAsImageAction(self):
+        fp = self.getValidFilePath(prompt='Save Image', filter='*.nii.gz;;*.nii', is_save=True)
+        if not fp:
+            return
+        
+        msk_nib = nib.Nifti1Image(self.MSK_OBJ.MSK, self.IMG_OBJ.AFFINE, self.IMG_OBJ.HEADER)
+        nib.save(msk_nib, fp)
 
     def openReorientDialog(self):
         self.reorientDialog.exec()
@@ -212,6 +265,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def topRight_labelMousePressEvent(self, event):
         self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.x(), event.y()]
         self.topRight_labelMouseMoveEvent(event)
+
+    def botLeft_labelMousePressEvent(self, event):
+        pass
 
     def botRight_labelMousePressEvent(self, event):
         self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
@@ -337,39 +393,40 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def update(self):
         self.update_scrollBarLabels()
         self.update_curserLabels()
-        if self.IMG_OBJ.VIEWER_TYPE == 4:
-            # All label should be same size
+        self.update_viewers()
 
-            self.update_multi_viewer()
-        else:
-            self.update_single_viewer()
-
-    def update_single_viewer(self):
-        print('update_single_viewer', self.IMG_OBJ.VIEWER_TYPE)
-
-    def update_multi_viewer(self):
+    def update_viewers(self):
         x, y, z = self.IMG_OBJ.FOC_POS
+
         multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
+        if self.IMG_OBJ.VIEWER_TYPE == 4:
+            multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.axi_worker.setArguments(
             self.IMG_OBJ.NP_IMG[:, :, z], self.MSK_OBJ.MSK[:, :, z], self.MSK_OBJ.OPA,
             [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
             [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][1]]], [0, 0],
             self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['axi'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size,
+            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[2]
         )
+        multi_size = (self.ui.topRight_frame.width()-self.ui.topRight_scrollBar.width(), self.ui.topRight_frame.height()-self.ui.topLeftZoomToFit_button.height())
+        if self.IMG_OBJ.VIEWER_TYPE == 4:
+            multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.sag_worker.setArguments(
             self.IMG_OBJ.NP_IMG[x, :, :], self.MSK_OBJ.MSK[x, :, :], self.MSK_OBJ.OPA,
             [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
             [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][1]]], [0, 0],
             self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['sag'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size,
+            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[0]
         )
+        multi_size = (self.ui.botRight_frame.width()-self.ui.botRight_scrollBar.width(), self.ui.botRight_frame.height()-self.ui.botRightZoomToFit_button.height())
+        if self.IMG_OBJ.VIEWER_TYPE == 4:
+            multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.cor_worker.setArguments(
             self.IMG_OBJ.NP_IMG[:, y, :], self.MSK_OBJ.MSK[:, y, :], self.MSK_OBJ.OPA,
             [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
             [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][1]]], [0, 0],
             self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['cor'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size,
+            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[1]
         )
         self.axi_worker.start()
         self.sag_worker.start()
