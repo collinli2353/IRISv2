@@ -147,6 +147,19 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.botLeft_button.clicked.connect(lambda: show_botLeft_frame())
         self.ui.botRight_button.clicked.connect(lambda: show_botRight_frame())
 
+        def zoom_to_fit(axismapping):
+            x, y = axismapping
+            multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
+            zoom_x = multi_size[0] / self.IMG_OBJ.SHAPE[x]
+            zoom_y = multi_size[1] / self.IMG_OBJ.SHAPE[y] 
+            self.IMG_OBJ.ZOOM_FACTOR = min(zoom_x, zoom_y)
+            self.IMG_OBJ.SHIFT = [0, 0, 0]
+            self.update()
+
+        self.ui.topLeftZoomToFit_button.clicked.connect(lambda: zoom_to_fit(self.IMG_OBJ.AXISMAPPING['axi']))
+        self.ui.topRightZoomToFit_button.clicked.connect(lambda: zoom_to_fit(self.IMG_OBJ.AXISMAPPING['sag']))
+        self.ui.botRightZoomToFit_button.clicked.connect(lambda: zoom_to_fit(self.IMG_OBJ.AXISMAPPING['cor']))
+
         # QLabel actions
         self.ui.topLeft_label.mousePressEvent = self.topLeft_labelMousePressEvent
         self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
