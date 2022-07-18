@@ -46,7 +46,6 @@ class ImageProcessWorker(QtCore.QThread):
             if bool_flip:
                 img = np.flip(img, axis)
                 msk = np.flip(msk, axis)
-                print('flipping', img_flip)
 
                 foc_pos_2d[axis] = img_size[axis] - foc_pos_2d[axis] - 1
 

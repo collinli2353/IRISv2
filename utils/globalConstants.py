@@ -126,16 +126,25 @@ class IMG_OBJ(metaclass=Singleton):
 
             # Desired RAI code is RPI
             if self.ORIG_RAI_CODE[0] != 'R':
-                self.IMG_FLIP['axi'][1] = not self.IMG_FLIP['axi'][1] # Flip axial horizontally
-                self.IMG_FLIP['cor'][1] = not self.IMG_FLIP['cor'][1] # Flip cornal horizontally
+                self.swapVoxelXAxis()
 
             if self.ORIG_RAI_CODE[1] != 'P':
-                self.IMG_FLIP['axi'][0] = not self.IMG_FLIP['axi'][0] # Flip axial vertically
-                self.IMG_FLIP['sag'][1] = not self.IMG_FLIP['sag'][1] # Flip saggital horizontally
+                self.swapVoxelYAxis()
 
             if self.ORIG_RAI_CODE[2] != 'I':
-                self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal vertically
-                self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital vertically
+                self.swapVoxelZAxis()
+
+    def swapVoxelXAxis(self):
+        self.IMG_FLIP['axi'][0] = not self.IMG_FLIP['axi'][0] # Flip axial horizontally
+        self.IMG_FLIP['cor'][0] = not self.IMG_FLIP['cor'][0] # Flip cornal horizontally
+
+    def swapVoxelYAxis(self):
+        self.IMG_FLIP['axi'][1] = not self.IMG_FLIP['axi'][1] # Flip axial vertically
+        self.IMG_FLIP['sag'][0] = not self.IMG_FLIP['sag'][0] # Flip saggital horizontally
+
+    def swapVoxelZAxis(self):
+        self.IMG_FLIP['cor'][1] = not self.IMG_FLIP['cor'][1] # Flip cornal vertically
+        self.IMG_FLIP['sag'][1] = not self.IMG_FLIP['sag'][1] # Flip saggital vertically
 
 
     def __str__(self):

@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import os
 import sys
 from enum import Enum
@@ -13,6 +14,7 @@ from qt_material import *
 from ImageProecessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
+from tools.curser_tool.curser import curser
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
@@ -50,7 +52,15 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             ]
 
         # TODO: have a setting to change the theme
-        # apply_stylesheet(app, theme=themes[0])
+        apply_stylesheet(app, theme=themes[0])
+
+        self.tools = OrderedDict({
+            'curser': curser(),
+        })
+
+        self.tool_buttons = OrderedDict({
+            'curser': self.ui.toolbar0_button,
+        })
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
@@ -63,34 +73,12 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             self.TOOL_OBJ.ACTIVE_TOOL_NAME = tool_name
             self.TOOL_OBJ.ACTIVE_TOOL_INDEX = index
 
-        self.ui.toolbar0_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.ui.toolbar0_button.clicked.connect(lambda: set_tool('curser', 0))
-        
-        self.ui.toolbar1_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
-        self.ui.toolbar1_button.clicked.connect(lambda: set_tool('smartclick', 1))
-
-        self.ui.toolbar2_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.ui.toolbar2_button.clicked.connect(lambda: set_tool('levelset', 2))
-
-        self.ui.toolbar3_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-        self.ui.toolbar3_button.clicked.connect(lambda: set_tool('zoom', 3))
-
-        self.ui.toolbar4_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
-        self.ui.toolbar4_button.clicked.connect(lambda: set_tool('painter', 4))
-
-        self.ui.toolbar5_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
-        self.ui.toolbar5_button.clicked.connect(lambda: set_tool('toolbar5', 5))
-
-        self.ui.toolbar6_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(6))
-
-        self.ui.toolbar7_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(7))
-
-        self.ui.toolbar8_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(8))
-
-        self.ui.toolbar9_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(9))
+        for index, tool_name in enumerate(self.tools):
+            self.ui.stackedWidget.addWidget(self.tools[tool_name])
+            self.tool_buttons[tool_name].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(index))
+            self.tool_buttons[tool_name].clicked.connect(lambda: set_tool(tool_name, index))
 
         # Window actions
-
         def show_all_frames():
             self.ui.topLeft_frame.show()
             self.ui.topRight_frame.show()
@@ -154,6 +142,11 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.topRight_label.mouseMoveEvent = self.topRight_labelMouseMoveEvent
         self.ui.botLeft_label.mouseMoveEvent = self.botLeft_labelMouseMoveEvent
         self.ui.botRight_label.mouseMoveEvent = self.botRight_labelMouseMoveEvent
+
+        self.ui.topLeft_label.wheelEvent = self.topLeft_labelWheelEvent
+        self.ui.topRight_label.wheelEvent = self.topRight_labelWheelEvent
+        self.ui.botLeft_label.wheelEvent = self.botLeft_labelWheelEvent
+        self.ui.botRight_label.wheelEvent = self.botRight_labelWheelEvent
 
         # QScrollBar actions
         self.ui.topLeft_scrollBar.valueChanged.connect(self.topLeft_scrollBarValueChanged)
@@ -273,98 +266,53 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
         self.botRight_labelMouseMoveEvent(event)
 
-    def topLeft_labelMouseMoveEvent(self, event):
-        [x, y] = self.computePosition(
-            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
-            self.IMG_OBJ.MARGIN['axi'],
-            self.IMG_OBJ.IMG_FLIP['axi'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[1]]
-            )
-        [x, y, z] = [x, y, self.IMG_OBJ.FOC_POS[2]]
+    def labelMouseMoveEvent(self, event, axis):
+        for index, tool_name in enumerate(self.tools):
+            self.tools[tool_name].widgetMouseMoveEvent(event, axis)
+        self.update_scrollBars()
+        self.update()
 
-        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [x, y, z]
+    def topLeft_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'axi')
+    def topRight_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'sag')
+    def botLeft_labelMouseMoveEvent(self, event): pass
+    def botRight_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'cor')
 
-            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                diff = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][1] - event.y()
-                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
-                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
 
-            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][0] - event.x()
-                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['axi'][1] - event.y()
-                self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
+    # ================================================== #
+    # Wheel Event ====================================== #
+    # ================================================== #
+    def increaseFocPos(self, axis):
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] = clamp(0, self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] + 1, self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] - 1)
 
-        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
+    def decreaseFocPos(self, axis):
+        self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] = clamp(0, self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] - 1, self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] - 1)
 
-        self.TOOL_OBJ.INIT_MOUSE_POS['axi'] = [event.x(), event.y()]
+    def topLeft_labelWheelEvent(self, event):
+        if event.angleDelta().y() > 0:
+            self.decreaseFocPos('topLeft')
+        else:
+            self.increaseFocPos('topLeft')
 
         self.update_scrollBars()
         self.update()
 
-    def topRight_labelMouseMoveEvent(self, event):
-        [x, y] = self.computePosition(
-            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
-            self.IMG_OBJ.MARGIN['sag'],
-            self.IMG_OBJ.IMG_FLIP['sag'], [self.IMG_OBJ.SHAPE[1], self.IMG_OBJ.SHAPE[2]]
-            )
-        [x, y, z] = [self.IMG_OBJ.FOC_POS[0], x, y]
-
-        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [x, y, z]
-
-            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                diff = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][1] - event.y()
-                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
-                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
-
-            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][0] - event.x()
-                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['sag'][1] - event.y()
-                self.IMG_OBJ.SHIFT = [0, self.IMG_OBJ.SHIFT[1] - diffX, self.IMG_OBJ.SHIFT[2] - diffY]
-
-        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
-
-        self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.x(), event.y()]
+    def topRight_labelWheelEvent(self, event):
+        if event.angleDelta().y() > 0:
+            self.decreaseFocPos('topRight')
+        else:
+            self.increaseFocPos('topRight')
 
         self.update_scrollBars()
         self.update()
 
-    def botLeft_labelMouseMoveEvent(self, event):
-        print('botLeft_labelMousePressEvent', event.x(), event.y())
+    def botLeft_labelWheelEvent(self, event):
+        print('botLeft_labelWheelEvent', event.angleDelta())
 
-    def botRight_labelMouseMoveEvent(self, event):
-        [x, y] = self.computePosition(
-            event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
-            self.IMG_OBJ.MARGIN['cor'],
-            self.IMG_OBJ.IMG_FLIP['cor'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[2]]
-            )
-        [x, y, z] = [x, self.IMG_OBJ.FOC_POS[1], y]
-
-        if self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'curser':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.IMG_OBJ.FOC_POS = [x, y, z]
-
-            elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-                diff = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][1] - event.y()
-                self.IMG_OBJ.ZOOM_FACTOR *= 1.01**(diff)
-                self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
-
-            elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-                diffX = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][0] - event.x()
-                diffY = self.TOOL_OBJ.INIT_MOUSE_POS['cor'][1] - event.y()
-                self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, 0, self.IMG_OBJ.SHIFT[2] - diffY]
-
-        elif self.TOOL_OBJ.ACTIVE_TOOL_NAME == 'painter':
-            if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-                self.MSK_OBJ.MSK[x, y, z] = self.MSK_OBJ.CURRENT_LBL
-
-        self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
+    def botRight_labelWheelEvent(self, event):
+        if event.angleDelta().y() > 0:
+            self.decreaseFocPos('botRight')
+        else:
+            self.increaseFocPos('botRight')
 
         self.update_scrollBars()
         self.update()
@@ -467,9 +415,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.botRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]))
 
     def update_curserLabels(self):
-        self.ui.curserX_label.setNum(self.IMG_OBJ.FOC_POS[0]+1)
-        self.ui.curserY_label.setNum(self.IMG_OBJ.FOC_POS[1]+1)
-        self.ui.curserZ_label.setNum(self.IMG_OBJ.FOC_POS[2]+1)
+        self.tools['curser'].ui.curserX_label.setNum(self.IMG_OBJ.FOC_POS[0]+1)
+        self.tools['curser'].ui.curserY_label.setNum(self.IMG_OBJ.FOC_POS[1]+1)
+        self.tools['curser'].ui.curserZ_label.setNum(self.IMG_OBJ.FOC_POS[2]+1)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
