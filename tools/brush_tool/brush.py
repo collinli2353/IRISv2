@@ -1,7 +1,7 @@
 import numpy as np
 import PySide6
 from PySide6 import QtCore, QtGui, QtWidgets
-from skimage.draw import circle_perimeter
+from skimage.draw import ellipse
 from skimage.morphology import octagon
 from tools.brush_tool.ui_brush_widget import *
 from tools.default_tool import Meta, default_tool
@@ -65,7 +65,7 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
                 s_msk[pos]=0
                 msk[s_x:s_x+w,s_y:s_y+w] = s_msk
         else:
-            rr, cc = circle_perimeter(s_x+w//2, s_y+w//2, w//2+1)
+            rr, cc = ellipse(s_x+w//2, s_y+w//2, w//2+1, w//2+1)
             if isPaint:
                 msk[rr, cc] = lbl 
             else: msk[rr, cc] = 0
