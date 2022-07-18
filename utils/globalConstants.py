@@ -182,12 +182,12 @@ class MSK_OBJ(metaclass=Singleton):
         self.MSK = np.zeros([100, 100, 100])
         self.OPA = 50
         self.LBL_IDS = [0]
-        CURRENT_LBL = 1
+        self.CURRENT_LBL = 1
 
     def newMsk(self, msk):
         self.MSK = msk
         self.OPA = 50
-        CURRENT_LBL = 1
+        self.CURRENT_LBL = 1
 
     def __str__(self):
         return f'''
@@ -198,13 +198,11 @@ lbl ids: {np.unique(self.MSK)}
 class TOOL_OBJ(metaclass=Singleton):
     ACTIVE_TOOL_INDEX = None
     ACTIVE_TOOL_NAME = None
-    TOOL_SHAPE = None
     INIT_MOUSE_POS = None
 
     def __init__(self):
         self.ACTIVE_TOOL_INDEX = 0
         self.ACTIVE_TOOL_NAME = 'curser'
-        self.TOOL_SHAPE = [5, 5]
         self.INIT_MOUSE_POS = {
             'axi': [0, 0],
             'sag': [0, 0],

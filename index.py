@@ -14,6 +14,7 @@ from qt_material import *
 from imageProcessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
+from tools.brush_tool.brush import brush
 from tools.curser_tool.curser import curser
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
@@ -52,14 +53,16 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             ]
 
         # TODO: have a setting to change the theme
-        apply_stylesheet(app, theme=themes[0])
+        # apply_stylesheet(app, theme=themes[0])
 
         self.tools = OrderedDict({
             'curser': curser(),
+            'brush': brush(),
         })
 
         self.tool_buttons = OrderedDict({
             'curser': self.ui.toolbar0_button,
+            'brush': self.ui.toolbar1_button,
         })
 
         # Menubar actions
@@ -69,14 +72,21 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.actionDebug.triggered.connect(self.debug)
 
         # Toolbar actions
-        def set_tool(tool_name, index):
+        def set_tool(index, tool_name):
             self.TOOL_OBJ.ACTIVE_TOOL_NAME = tool_name
             self.TOOL_OBJ.ACTIVE_TOOL_INDEX = index
+            print('switching tool to', tool_name, index)
 
         for index, tool_name in enumerate(self.tools):
             self.ui.stackedWidget.addWidget(self.tools[tool_name])
-            self.tool_buttons[tool_name].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(index))
-            self.tool_buttons[tool_name].clicked.connect(lambda: set_tool(tool_name, index))
+
+        self.tool_buttons['curser'].clicked.connect(lambda: set_tool(0, 'curser'))
+        self.tool_buttons['curser'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
+        self.tool_buttons['curser'].clicked.connect(lambda: self.update())
+
+        self.tool_buttons['brush'].clicked.connect(lambda: set_tool(1, 'brush'))
+        self.tool_buttons['brush'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
+        self.tool_buttons['brush'].clicked.connect(lambda: self.update())
 
         # Window actions
         def show_all_frames():
@@ -126,6 +136,11 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
                 self.IMG_OBJ.VIEWER_TYPE = 3
             else:
                 show_all_frames()
+
+        self.ui.topLeft_label.setMouseTracking(True)
+        self.ui.topRight_label.setMouseTracking(True)
+        self.ui.botLeft_label.setMouseTracking(True)
+        self.ui.botRight_label.setMouseTracking(True)
                 
         self.ui.topLeft_button.clicked.connect(lambda: show_topLeft_frame())
         self.ui.topRight_button.clicked.connect(lambda: show_topRight_frame())
@@ -205,7 +220,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         )
 
     def saveAsImageAction(self):
-        fp = self.getValidFilePath(prompt='Save Image', filter='*.nii.gz;;*.nii', is_save=True)
+        fp = self.getValidFilePath(prompt='Save Image', filter='*.nii.gz;;*.nii', is_save=True)[0]
+        print('Saving image to:', fp)
         if not fp:
             return
         
@@ -267,8 +283,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.botRight_labelMouseMoveEvent(event)
 
     def labelMouseMoveEvent(self, event, axis):
-        for index, tool_name in enumerate(self.tools):
-            self.tools[tool_name].widgetMouseMoveEvent(event, axis)
+        self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME].widgetMouseMoveEvent(event, axis)
         self.update_scrollBars()
         self.update()
 

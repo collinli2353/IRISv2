@@ -1,0 +1,10 @@
+import PySide6
+from PySide6 import QtCore, QtGui, QtWidgets
+from tools.curser_tool.ui_curserWidget import *
+from tools.default_tool import Meta, default_tool
+
+class tool_template(QtWidgets.QWidget, default_tool, metaclass=Meta):
+    def __init__(self):
+        QtWidgets.QWidget.__init__(self)
+        self.ui = Ui_curserWidget()
+        self.ui.setupUi(self)

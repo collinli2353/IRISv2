@@ -115,7 +115,7 @@ class ImageProcessWorker(QtCore.QThread):
         new_point = [point_pos_2d[0]+margin[0], point_pos_2d[1]+margin[1]]
 
         # Tool based curser drawing
-        painter = tool.widgetDraw(pixmap, new_foc, new_point, margin, spacing, newshape)
+        painter = tool.widgetDraw(pixmap, new_foc, new_point, zoom, margin, spacing, newshape)
 
         # RAI display letters
         painter.setPen(lettersPen(rgb(227, 170, 0)))
