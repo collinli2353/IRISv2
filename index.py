@@ -11,7 +11,7 @@ from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QColor as rgb
 from qt_material import *
-from ImageProecessWorker import ImageProcessWorker
+from imageProcessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
 from tools.curser_tool.curser import curser
@@ -277,7 +277,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def botLeft_labelMouseMoveEvent(self, event): pass
     def botRight_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'cor')
 
-
     # ================================================== #
     # Wheel Event ====================================== #
     # ================================================== #
@@ -340,7 +339,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     def update(self):
         self.update_scrollBarLabels()
-        self.update_curserLabels()
+
+        self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME].widgetUpdate()
+
         self.update_viewers()
 
     def update_viewers(self):
@@ -350,31 +351,55 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.axi_worker.setArguments(
-            self.IMG_OBJ.NP_IMG[:, :, z], self.MSK_OBJ.MSK[:, :, z], self.MSK_OBJ.OPA,
-            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
-            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][1]]], [0, 0],
-            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['axi'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[2]
+            img = self.IMG_OBJ.NP_IMG[:, :, z],
+            msk = self.MSK_OBJ.MSK[:, :, z],
+            opa = self.MSK_OBJ.OPA,
+            foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
+            point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
+            tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
+            shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
+            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_lev = self.IMG_OBJ.LEVEL_VALUE,
+            img_flip = self.IMG_OBJ.IMG_FLIP['axi'],
+            zoom = self.IMG_OBJ.ZOOM_FACTOR, 
+            viewer_size = multi_size,
+            rai_display_letters = self.IMG_OBJ.RAI_DISPLAY_LETTERS[2]
         )
         multi_size = (self.ui.topRight_frame.width()-self.ui.topRight_scrollBar.width(), self.ui.topRight_frame.height()-self.ui.topLeftZoomToFit_button.height())
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.sag_worker.setArguments(
-            self.IMG_OBJ.NP_IMG[x, :, :], self.MSK_OBJ.MSK[x, :, :], self.MSK_OBJ.OPA,
-            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
-            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][1]]], [0, 0],
-            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['sag'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[0]
+            img = self.IMG_OBJ.NP_IMG[x, :, :],
+            msk = self.MSK_OBJ.MSK[x, :, :],
+            opa = self.MSK_OBJ.OPA,
+            foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
+            point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
+            tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
+            shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
+            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_lev = self.IMG_OBJ.LEVEL_VALUE,
+            img_flip = self.IMG_OBJ.IMG_FLIP['sag'],
+            zoom = self.IMG_OBJ.ZOOM_FACTOR, 
+            viewer_size = multi_size,
+            rai_display_letters = self.IMG_OBJ.RAI_DISPLAY_LETTERS[0]
         )
         multi_size = (self.ui.botRight_frame.width()-self.ui.botRight_scrollBar.width(), self.ui.botRight_frame.height()-self.ui.botRightZoomToFit_button.height())
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.cor_worker.setArguments(
-            self.IMG_OBJ.NP_IMG[:, y, :], self.MSK_OBJ.MSK[:, y, :], self.MSK_OBJ.OPA,
-            [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
-            [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][1]]], [0, 0],
-            self.IMG_OBJ.WINDOW_LEVEL, self.IMG_OBJ.LEVEL_VALUE, self.IMG_OBJ.IMG_FLIP['cor'], self.IMG_OBJ.ZOOM_FACTOR, 
-            multi_size, self.IMG_OBJ.RAI_DISPLAY_LETTERS[1]
+            img = self.IMG_OBJ.NP_IMG[:, y, :],
+            msk = self.MSK_OBJ.MSK[:, y, :],
+            opa = self.MSK_OBJ.OPA,
+            foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
+            point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
+            tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
+            shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
+            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_lev = self.IMG_OBJ.LEVEL_VALUE,
+            img_flip = self.IMG_OBJ.IMG_FLIP['cor'],
+            zoom = self.IMG_OBJ.ZOOM_FACTOR, 
+            viewer_size = multi_size,
+            rai_display_letters = self.IMG_OBJ.RAI_DISPLAY_LETTERS[1]
         )
         self.axi_worker.start()
         self.sag_worker.start()
@@ -413,11 +438,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.topLeftZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topLeft']]))
         self.ui.topRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['topRight']]))
         self.ui.botRightZoomToFit_label.setText(str(self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]+1) + ' of ' + str(self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']]))
-
-    def update_curserLabels(self):
-        self.tools['curser'].ui.curserX_label.setNum(self.IMG_OBJ.FOC_POS[0]+1)
-        self.tools['curser'].ui.curserY_label.setNum(self.IMG_OBJ.FOC_POS[1]+1)
-        self.tools['curser'].ui.curserZ_label.setNum(self.IMG_OBJ.FOC_POS[2]+1)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

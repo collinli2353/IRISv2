@@ -6,7 +6,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QColor as rgb
 
 from utils.colorTable import mapLabelsToColors
-from utils.utils import lettersPen, theBrushPen, theCrossPen
+from utils.utils import lettersPen
 
 
 class ImageProcessWorker(QtCore.QThread):
@@ -19,7 +19,7 @@ class ImageProcessWorker(QtCore.QThread):
 
     def setArguments(self,
                      img, msk, opa,
-                     foc_pos_2d, shift_2d, point_pos_2d,
+                     foc_pos_2d, point_pos_2d, tool, shift_2d,
                      val_win, val_lev,
                      img_flip, zoom, viewer_size,
                      rai_display_letters
@@ -31,6 +31,7 @@ class ImageProcessWorker(QtCore.QThread):
             'opa': opa,
             'foc_pos_2d': foc_pos_2d,
             'point_pos_2d': point_pos_2d,
+            'tool': tool,
             'shift_2d': shift_2d,
             'val_win': val_win,
             'val_lev': val_lev,
@@ -40,7 +41,7 @@ class ImageProcessWorker(QtCore.QThread):
             'rai_display_letters': rai_display_letters
         })
 
-    def transform(self, img, msk, foc_pos_2d, img_flip):
+    def transform(self, img, msk, foc_pos_2d, point_pos_2d, img_flip):
         img_size = img.shape
         for axis, bool_flip in enumerate(img_flip):
             if bool_flip:
@@ -48,8 +49,9 @@ class ImageProcessWorker(QtCore.QThread):
                 msk = np.flip(msk, axis)
 
                 foc_pos_2d[axis] = img_size[axis] - foc_pos_2d[axis] - 1
+                point_pos_2d[axis] = img_size[axis] - point_pos_2d[axis] - 1
 
-        return img, msk, foc_pos_2d
+        return img, msk, foc_pos_2d, point_pos_2d
 
     def mapLabelToRGB(self, msk):
 
@@ -69,12 +71,12 @@ class ImageProcessWorker(QtCore.QThread):
 
     def run(self):
 
-        img, msk, opa, foc_pos_2d, point_pos_2d, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
+        img, msk, opa, foc_pos_2d, point_pos_2d, tool, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
 
         # val_max = val_lev + val_win / 2
         # val_min = val_lev - val_win / 2
 
-        img, msk, foc_pos_2d = self.transform(img, msk, foc_pos_2d, img_flip)
+        img, msk, foc_pos_2d, point_pos_2d = self.transform(img, msk, foc_pos_2d, point_pos_2d, img_flip)
         # img[img > val_max] = val_max
         # img[img < val_min] = val_min
         # img = (img - val_min)/(val_max-val_min+1e-5)
@@ -94,6 +96,7 @@ class ImageProcessWorker(QtCore.QThread):
         size = (round(viewer_size[0]), round(viewer_size[1]))
         zoom_factor = zoom
         foc_pos_2d = [pos*zoom_factor for pos in foc_pos_2d]
+        point_pos_2d = [pos*zoom_factor for pos in point_pos_2d]
 
         newshape = (round(shape[0] * zoom_factor),
                     (round(shape[1] * zoom_factor)))
@@ -107,16 +110,14 @@ class ImageProcessWorker(QtCore.QThread):
 
         imgqt = ImageQt.ImageQt(final_img.convert('RGBA'))
         pixmap = QtGui.QPixmap.fromImage(imgqt)
-
-        painter = QtGui.QPainter(pixmap)
-        painter.setPen(theCrossPen())
+        
         new_foc = [foc_pos_2d[0]+margin[0], foc_pos_2d[1]+margin[1]]
+        new_point = [point_pos_2d[0]+margin[0], point_pos_2d[1]+margin[1]]
 
-        painter.drawLine(int(margin[0]), int(new_foc[1]+spacing/2),
-                         int(margin[0]+newshape[0]), int(new_foc[1]+spacing/2))
-        painter.drawLine(int(new_foc[0]+spacing/2), int(margin[1]),
-                         int(new_foc[0]+spacing/2), int(margin[1]+newshape[1]))
+        # Tool based curser drawing
+        painter = tool.widgetDraw(pixmap, new_foc, new_point, margin, spacing, newshape)
 
+        # RAI display letters
         painter.setPen(lettersPen(rgb(227, 170, 0)))
         size = 10
         painter.setFont(QtGui.QFont('Robato', size, QtGui.QFont.Bold))
