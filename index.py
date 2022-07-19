@@ -16,6 +16,7 @@ from imageProcessWorker import ImageProcessWorker
 from dialogs.reorientImageDialog import ReorientImageDialog
 from tools.brush_tool.brush import brush
 from tools.curser_tool.curser import curser
+from tools.levelset_tool.levelset import levelset
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
@@ -58,18 +59,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tools = OrderedDict({
             'curser': curser(),
             'brush': brush(),
+            'levelset': levelset(),
         })
 
         self.tool_buttons = OrderedDict({
             'curser': self.ui.toolbar0_button,
             'brush': self.ui.toolbar1_button,
+            'levelset': self.ui.toolbar2_button,
         })
-
-        # Menubar actions
-        self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
-        self.ui.actionSave_As.triggered.connect(self.saveAsImageAction)
-        self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
-        self.ui.actionDebug.triggered.connect(self.debug)
 
         # Toolbar actions
         def set_tool(index, tool_name):
@@ -88,6 +85,15 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['brush'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
         self.tool_buttons['brush'].clicked.connect(lambda: self.update())
 
+        self.tool_buttons['levelset'].clicked.connect(lambda: set_tool(2, 'levelset'))
+        self.tool_buttons['levelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
+        self.tool_buttons['levelset'].clicked.connect(lambda: self.update())
+        # Menubar actions
+        self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
+        self.ui.actionSave_As.triggered.connect(self.saveAsImageAction)
+        self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
+        self.ui.actionDebug.triggered.connect(self.debug)
+
         # Window actions
         def show_all_frames():
             self.ui.topLeft_frame.show()
@@ -103,10 +109,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
                 self.ui.botLeft_frame.hide()
                 self.ui.botRight_frame.hide()
                 self.IMG_OBJ.VIEWER_TYPE = 0
-            else:
-                show_all_frames()
+            else: show_all_frames()
                 
-
         def show_topRight_frame():
             if self.IMG_OBJ.VIEWER_TYPE == 4:
                 self.ui.topLeft_frame.hide()
@@ -114,8 +118,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
                 self.ui.botLeft_frame.hide()
                 self.ui.botRight_frame.hide()
                 self.IMG_OBJ.VIEWER_TYPE = 1
-            else:
-                show_all_frames()
+            else: show_all_frames()
 
         def show_botLeft_frame():
             if self.IMG_OBJ.VIEWER_TYPE == 4:
@@ -124,8 +127,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
                 self.ui.botLeft_frame.show()
                 self.ui.botRight_frame.hide()
                 self.IMG_OBJ.VIEWER_TYPE = 2
-            else:
-                show_all_frames()
+            else: show_all_frames()
 
         def show_botRight_frame():
             if self.IMG_OBJ.VIEWER_TYPE == 4:
@@ -134,8 +136,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
                 self.ui.botLeft_frame.hide()
                 self.ui.botRight_frame.show()
                 self.IMG_OBJ.VIEWER_TYPE = 3
-            else:
-                show_all_frames()
+            else: show_all_frames()
 
         self.ui.topLeft_label.setMouseTracking(True)
         self.ui.topRight_label.setMouseTracking(True)
@@ -181,6 +182,16 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.topRight_scrollBar.valueChanged.connect(self.topRight_scrollBarValueChanged)
         self.ui.botLeft_scrollBar.valueChanged.connect(self.botLeft_scrollBarValueChanged)
         self.ui.botRight_scrollBar.valueChanged.connect(self.botRight_scrollBarValueChanged)
+
+        # QSlider actions
+        self.ui.segOpa_slider.valueChanged.connect(self.opa_sliderValueChanged)
+
+        # Segmentation Label Actions
+        self.ui.segActiveLabel_combobox.addItems(['Label ' + str(i) for i in self.MSK_OBJ.LBL_IDS])
+        self.ui.segActiveLabel_combobox.setCurrentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
+        self.ui.segActiveLabel_combobox.currentIndexChanged.connect(self.segActiveLabelChanged)
+        
+        self.ui.segAddLabel_button.clicked.connect(self.segAddLabelPressed)
 
         self.init_scrollBars()
         self.update_scrollBars()
@@ -361,6 +372,26 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def botRight_scrollBarValueChanged(self, value):
         self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING['botRight']] = value-1
         self.update()
+
+    # ================================================== #
+    # Label Events ==================================== #
+    # ================================================== #
+
+    def opa_sliderValueChanged(self, value):
+        self.MSK_OBJ.OPA = value
+        self.ui.segOpa_label.setText(str(value))
+        self.update()
+
+    def segActiveLabelChanged(self, index):
+        self.MSK_OBJ.ACTIVE_LABEL = index
+        self.update()
+
+    def segAddLabelPressed(self):
+        self.MSK_OBJ.addLabel()
+        self.ui.segActiveLabel_combobox.addItem('Label ' + str(self.MSK_OBJ.LBL_IDS[-1]))
+        self.ui.segActiveLabel_combobox.setCurrentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
+        self.update()
+
 
     # ================================================== #
     # Update Events ==================================== #

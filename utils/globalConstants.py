@@ -175,19 +175,24 @@ is dicom: {self.IS_DICOM}
 class MSK_OBJ(metaclass=Singleton):
     MSK = None
     OPA = None
-    LBL_IDS = [0]
+    LBL_IDS = [0, 1]
     CURRENT_LBL = 1
 
     def __init__(self):
         self.MSK = np.zeros([100, 100, 100])
         self.OPA = 50
-        self.LBL_IDS = [0]
+        self.LBL_IDS = [0, 1]
         self.CURRENT_LBL = 1
 
     def newMsk(self, msk):
         self.MSK = msk
         self.OPA = 50
+        self.LBL_IDS = [int(i) for i in np.unique(self.MSK)]
         self.CURRENT_LBL = 1
+
+    def addLabel(self):
+        self.LBL_IDS.append(self.LBL_IDS[-1]+1)
+        self.CURRENT_LBL = self.LBL_IDS[-1]
 
     def __str__(self):
         return f'''

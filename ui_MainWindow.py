@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'MainWindowohPqUc.ui'
+## Form generated from reading UI file 'MainWindowmGrtUu.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -178,12 +178,73 @@ class Ui_MainWindow(object):
 
         self.seg_frame = QFrame(self.left_frame)
         self.seg_frame.setObjectName(u"seg_frame")
-        self.seg_frame.setMinimumSize(QSize(0, 75))
+        self.seg_frame.setMinimumSize(QSize(0, 150))
         self.seg_frame.setFrameShape(QFrame.StyledPanel)
         self.seg_frame.setFrameShadow(QFrame.Raised)
-        self.label_4 = QLabel(self.seg_frame)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setGeometry(QRect(20, 20, 71, 16))
+        self.verticalLayout_2 = QVBoxLayout(self.seg_frame)
+        self.verticalLayout_2.setSpacing(0)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.segActiveLabel_layout = QHBoxLayout()
+        self.segActiveLabel_layout.setObjectName(u"segActiveLabel_layout")
+        self.setActiveLabel_label = QLabel(self.seg_frame)
+        self.setActiveLabel_label.setObjectName(u"setActiveLabel_label")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.setActiveLabel_label.sizePolicy().hasHeightForWidth())
+        self.setActiveLabel_label.setSizePolicy(sizePolicy3)
+        self.setActiveLabel_label.setMinimumSize(QSize(0, 0))
+        self.setActiveLabel_label.setMaximumSize(QSize(80, 16777215))
+
+        self.segActiveLabel_layout.addWidget(self.setActiveLabel_label)
+
+        self.segActiveLabel_combobox = QComboBox(self.seg_frame)
+        self.segActiveLabel_combobox.setObjectName(u"segActiveLabel_combobox")
+
+        self.segActiveLabel_layout.addWidget(self.segActiveLabel_combobox)
+
+
+        self.verticalLayout_2.addLayout(self.segActiveLabel_layout)
+
+        self.insertLabel_layout = QHBoxLayout()
+        self.insertLabel_layout.setObjectName(u"insertLabel_layout")
+        self.segAddLabel_button = QPushButton(self.seg_frame)
+        self.segAddLabel_button.setObjectName(u"segAddLabel_button")
+
+        self.insertLabel_layout.addWidget(self.segAddLabel_button)
+
+        self.segRemoveLabel_button = QPushButton(self.seg_frame)
+        self.segRemoveLabel_button.setObjectName(u"segRemoveLabel_button")
+
+        self.insertLabel_layout.addWidget(self.segRemoveLabel_button)
+
+
+        self.verticalLayout_2.addLayout(self.insertLabel_layout)
+
+        self.segOpa_layout = QHBoxLayout()
+        self.segOpa_layout.setObjectName(u"segOpa_layout")
+        self.segOpa_label = QLabel(self.seg_frame)
+        self.segOpa_label.setObjectName(u"segOpa_label")
+
+        self.segOpa_layout.addWidget(self.segOpa_label)
+
+        self.segOpa_spacer = QSpacerItem(20, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
+
+        self.segOpa_layout.addItem(self.segOpa_spacer)
+
+        self.segOpa_slider = QSlider(self.seg_frame)
+        self.segOpa_slider.setObjectName(u"segOpa_slider")
+        self.segOpa_slider.setMaximum(100)
+        self.segOpa_slider.setSliderPosition(50)
+        self.segOpa_slider.setOrientation(Qt.Horizontal)
+        self.segOpa_slider.setTickPosition(QSlider.NoTicks)
+
+        self.segOpa_layout.addWidget(self.segOpa_slider)
+
+
+        self.verticalLayout_2.addLayout(self.segOpa_layout)
+
 
         self.verticalLayout.addWidget(self.seg_frame)
 
@@ -202,11 +263,11 @@ class Ui_MainWindow(object):
         self.viewer_stackedWidget.setObjectName(u"viewer_stackedWidget")
         self.multiViewer = QWidget()
         self.multiViewer.setObjectName(u"multiViewer")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(self.multiViewer.sizePolicy().hasHeightForWidth())
-        self.multiViewer.setSizePolicy(sizePolicy3)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.multiViewer.sizePolicy().hasHeightForWidth())
+        self.multiViewer.setSizePolicy(sizePolicy4)
         self.multiViewer.setBaseSize(QSize(50, 50))
         self.gridLayout = QGridLayout(self.multiViewer)
         self.gridLayout.setSpacing(0)
@@ -243,11 +304,11 @@ class Ui_MainWindow(object):
 
         self.topLeft_scrollBar = QScrollBar(self.topLeft_frame)
         self.topLeft_scrollBar.setObjectName(u"topLeft_scrollBar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.topLeft_scrollBar.sizePolicy().hasHeightForWidth())
-        self.topLeft_scrollBar.setSizePolicy(sizePolicy4)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.topLeft_scrollBar.sizePolicy().hasHeightForWidth())
+        self.topLeft_scrollBar.setSizePolicy(sizePolicy5)
         self.topLeft_scrollBar.setMaximumSize(QSize(25, 16777215))
         self.topLeft_scrollBar.setOrientation(Qt.Vertical)
 
@@ -313,8 +374,8 @@ class Ui_MainWindow(object):
 
         self.topRight_scrollBar = QScrollBar(self.topRight_frame)
         self.topRight_scrollBar.setObjectName(u"topRight_scrollBar")
-        sizePolicy4.setHeightForWidth(self.topRight_scrollBar.sizePolicy().hasHeightForWidth())
-        self.topRight_scrollBar.setSizePolicy(sizePolicy4)
+        sizePolicy5.setHeightForWidth(self.topRight_scrollBar.sizePolicy().hasHeightForWidth())
+        self.topRight_scrollBar.setSizePolicy(sizePolicy5)
         self.topRight_scrollBar.setMaximumSize(QSize(25, 16777215))
         self.topRight_scrollBar.setOrientation(Qt.Vertical)
 
@@ -380,8 +441,8 @@ class Ui_MainWindow(object):
 
         self.botRight_scrollBar = QScrollBar(self.botRight_frame)
         self.botRight_scrollBar.setObjectName(u"botRight_scrollBar")
-        sizePolicy4.setHeightForWidth(self.botRight_scrollBar.sizePolicy().hasHeightForWidth())
-        self.botRight_scrollBar.setSizePolicy(sizePolicy4)
+        sizePolicy5.setHeightForWidth(self.botRight_scrollBar.sizePolicy().hasHeightForWidth())
+        self.botRight_scrollBar.setSizePolicy(sizePolicy5)
         self.botRight_scrollBar.setMaximumSize(QSize(25, 16777215))
         self.botRight_scrollBar.setOrientation(Qt.Vertical)
 
@@ -448,8 +509,8 @@ class Ui_MainWindow(object):
 
         self.botLeft_scrollBar = QScrollBar(self.botLeft_frame)
         self.botLeft_scrollBar.setObjectName(u"botLeft_scrollBar")
-        sizePolicy4.setHeightForWidth(self.botLeft_scrollBar.sizePolicy().hasHeightForWidth())
-        self.botLeft_scrollBar.setSizePolicy(sizePolicy4)
+        sizePolicy5.setHeightForWidth(self.botLeft_scrollBar.sizePolicy().hasHeightForWidth())
+        self.botLeft_scrollBar.setSizePolicy(sizePolicy5)
         self.botLeft_scrollBar.setMaximumSize(QSize(25, 16777215))
         self.botLeft_scrollBar.setOrientation(Qt.Vertical)
 
@@ -586,7 +647,10 @@ class Ui_MainWindow(object):
         self.toolbar8_button.setText(QCoreApplication.translate("MainWindow", u"9", None))
         self.toolbar7_button.setText(QCoreApplication.translate("MainWindow", u"8", None))
         self.toolbar2_button.setText(QCoreApplication.translate("MainWindow", u"3", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Active Label", None))
+        self.setActiveLabel_label.setText(QCoreApplication.translate("MainWindow", u"Active Label:", None))
+        self.segAddLabel_button.setText(QCoreApplication.translate("MainWindow", u"Add Label", None))
+        self.segRemoveLabel_button.setText(QCoreApplication.translate("MainWindow", u"Remove Label", None))
+        self.segOpa_label.setText(QCoreApplication.translate("MainWindow", u"50", None))
         self.topLeft_label.setText("")
         self.topLeft_button.setText(QCoreApplication.translate("MainWindow", u"A", None))
         self.topLeftZoomToFit_button.setText(QCoreApplication.translate("MainWindow", u"zoom to fit", None))

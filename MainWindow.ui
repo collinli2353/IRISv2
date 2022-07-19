@@ -303,7 +303,7 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>75</height>
+           <height>150</height>
           </size>
          </property>
          <property name="frameShape">
@@ -312,19 +312,116 @@
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <widget class="QLabel" name="label_4">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>20</y>
-            <width>71</width>
-            <height>16</height>
-           </rect>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="spacing">
+           <number>0</number>
           </property>
-          <property name="text">
-           <string>Active Label</string>
+          <property name="leftMargin">
+           <number>0</number>
           </property>
-         </widget>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="segActiveLabel_layout">
+            <item>
+             <widget class="QLabel" name="setActiveLabel_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Active Label:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="segActiveLabel_combobox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="insertLabel_layout">
+            <item>
+             <widget class="QPushButton" name="segAddLabel_button">
+              <property name="text">
+               <string>Add Label</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="segRemoveLabel_button">
+              <property name="text">
+               <string>Remove Label</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="segOpa_layout">
+            <item>
+             <widget class="QLabel" name="segOpa_label">
+              <property name="text">
+               <string>50</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="segOpa_spacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QSlider" name="segOpa_slider">
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="sliderPosition">
+               <number>50</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::NoTicks</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
