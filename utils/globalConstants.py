@@ -1,6 +1,8 @@
 import numpy as np
 import nibabel as nib
 
+from utils.maskManager import maskManager
+
 class Singleton(type):
     _instances = {}
 
@@ -20,7 +22,7 @@ class IMG_OBJ(metaclass=Singleton):
     HEADER = None
     SHAPE = None
     MIN_MAX_INTENSITIES = None
-    WINDOW_LEVEL = None
+    WINDOW_VALUE = None
     LEVEL_VALUE = None
     FOC_POS = None
     POINT_POS = None
@@ -49,7 +51,7 @@ class IMG_OBJ(metaclass=Singleton):
         self.HEADER = None
         self.SHAPE = (100, 100, 100)
         self.MIN_MAX_INTENSITIES = (0, 0)
-        self.WINDOW_LEVEL = 0
+        self.WINDOW_VALUE = 0
         self.LEVEL_VALUE = 0
         self.FOC_POS = [50, 50, 50]
         self.POINT_POS = [50, 50, 50]
@@ -112,9 +114,9 @@ class IMG_OBJ(metaclass=Singleton):
             self.AFFINE = self.NIBABEL_IMG.affine
             self.HEADER = self.NIBABEL_IMG.header
             self.SHAPE = self.ORIG_NP_IMG.shape
-            self.MIN_MAX_INTENSITIES = (self.ORIG_NP_IMG.min(), self.ORIG_NP_IMG.max())
-            self.WINDOW_LEVEL = (self.ORIG_NP_IMG.max() - self.ORIG_NP_IMG.min()) / 2
-            self.LEVEL_VALUE = self.ORIG_NP_IMG.mean()
+            self.MIN_MAX_INTENSITIES = (self.NP_IMG.min(), self.NP_IMG.max())
+            self.WINDOW_VALUE = self.ORIG_NP_IMG.max() - self.ORIG_NP_IMG.min()
+            self.LEVEL_VALUE = (self.ORIG_NP_IMG.max() + self.ORIG_NP_IMG.min()) / 2
             self.FOC_POS = [self.SHAPE[0] // 2, self.SHAPE[1] // 2, self.SHAPE[2] // 2]
             self.ZOOM_FACTOR = 1
             self.SHIFT = [0, 0, 0]
@@ -157,7 +159,7 @@ affine: {self.AFFINE}
 header: {self.HEADER}
 shape: {self.SHAPE}
 min_max_intensities: {self.MIN_MAX_INTENSITIES}
-window_level: {self.WINDOW_LEVEL}
+window_value: {self.WINDOW_VALUE}
 level_value: {self.LEVEL_VALUE}
 foc_pos: {self.FOC_POS}
 zoom_factor: {self.ZOOM_FACTOR}
@@ -177,18 +179,31 @@ class MSK_OBJ(metaclass=Singleton):
     OPA = None
     LBL_IDS = [0, 1]
     CURRENT_LBL = 1
+    maskChangeManager = maskManager()
 
     def __init__(self):
         self.MSK = np.zeros([100, 100, 100])
         self.OPA = 50
         self.LBL_IDS = [0, 1]
         self.CURRENT_LBL = 1
+        self.maskChangeManager = maskManager()
 
     def newMsk(self, msk):
         self.MSK = msk
         self.OPA = 50
         self.LBL_IDS = [int(i) for i in np.unique(self.MSK)]
-        self.CURRENT_LBL = 1
+        self.CURRENT_LBL = self.LBL_IDS[-1]
+        self.maskChangeManager = maskManager()
+
+    def updateMaskManager(self, msk):
+        self.MSK = msk
+        self.maskChangeManager.updateNewChange(msk)
+
+    def undo(self):
+        self.MSK = self.maskChangeManager.undoMaskChange(self.MSK)
+
+    def redo(self):
+        self.MSK = self.maskChangeManager.redoMaskChange(self.MSK)
 
     def addLabel(self):
         self.LBL_IDS.append(self.LBL_IDS[-1]+1)

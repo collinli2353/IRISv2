@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'curserWidgetijQhwB.ui'
+## Form generated from reading UI file 'curserWidgetptGDAF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -17,7 +17,7 @@ class Ui_curserWidget(object):
     def setupUi(self, curserWidget):
         if not curserWidget.objectName():
             curserWidget.setObjectName(u"curserWidget")
-        curserWidget.resize(140, 152)
+        curserWidget.resize(140, 244)
         self.verticalLayout = QVBoxLayout(curserWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.curser_verticalSpacer = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -86,6 +86,52 @@ class Ui_curserWidget(object):
 
         self.verticalLayout.addWidget(self.curserIntensity_frame)
 
+        self.label = QLabel(curserWidget)
+        self.label.setObjectName(u"label")
+
+        self.verticalLayout.addWidget(self.label)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.winVal_label = QLabel(curserWidget)
+        self.winVal_label.setObjectName(u"winVal_label")
+
+        self.horizontalLayout.addWidget(self.winVal_label)
+
+        self.winVal_slider = QSlider(curserWidget)
+        self.winVal_slider.setObjectName(u"winVal_slider")
+        self.winVal_slider.setMinimum(-200)
+        self.winVal_slider.setMaximum(2000)
+        self.winVal_slider.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout.addWidget(self.winVal_slider)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
+        self.label_2 = QLabel(curserWidget)
+        self.label_2.setObjectName(u"label_2")
+
+        self.verticalLayout.addWidget(self.label_2)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.levVal_label = QLabel(curserWidget)
+        self.levVal_label.setObjectName(u"levVal_label")
+
+        self.horizontalLayout_3.addWidget(self.levVal_label)
+
+        self.levVal_slider = QSlider(curserWidget)
+        self.levVal_slider.setObjectName(u"levVal_slider")
+        self.levVal_slider.setMinimum(-200)
+        self.levVal_slider.setMaximum(2000)
+        self.levVal_slider.setOrientation(Qt.Horizontal)
+
+        self.horizontalLayout_3.addWidget(self.levVal_slider)
+
+
+        self.verticalLayout.addLayout(self.horizontalLayout_3)
+
 
         self.retranslateUi(curserWidget)
 
@@ -102,5 +148,9 @@ class Ui_curserWidget(object):
         self.minIntensity_label.setText(QCoreApplication.translate("curserWidget", u"#", None))
         self.maxIntensity_label.setText(QCoreApplication.translate("curserWidget", u"#", None))
         self.curIntensity_label.setText(QCoreApplication.translate("curserWidget", u"#", None))
+        self.label.setText(QCoreApplication.translate("curserWidget", u"Window Value", None))
+        self.winVal_label.setText(QCoreApplication.translate("curserWidget", u"0", None))
+        self.label_2.setText(QCoreApplication.translate("curserWidget", u"Level Value", None))
+        self.levVal_label.setText(QCoreApplication.translate("curserWidget", u"0", None))
     # retranslateUi
 

@@ -73,13 +73,13 @@ class ImageProcessWorker(QtCore.QThread):
 
         img, msk, opa, foc_pos_2d, point_pos_2d, tool, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
 
-        # val_max = val_lev + val_win / 2
-        # val_min = val_lev - val_win / 2
+        val_max = val_lev + val_win / 2
+        val_min = val_lev - val_win / 2
 
         img, msk, foc_pos_2d, point_pos_2d = self.transform(img, msk, foc_pos_2d, point_pos_2d, img_flip)
-        # img[img > val_max] = val_max
-        # img[img < val_min] = val_min
-        # img = (img - val_min)/(val_max-val_min+1e-5)
+        img[img > val_max] = val_max
+        img[img < val_min] = val_min
+        img = (img - val_min)/(val_max-val_min+1e-5)
         img = np.stack([img.T, img.T, img.T], axis=-1)
         msk_pos = (msk > 0).astype(float)
 

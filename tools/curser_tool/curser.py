@@ -15,6 +15,19 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.IMG_OBJ = IMG_OBJ()
         self.TOOL_OBJ = TOOL_OBJ()
 
+        
+
+        self.ui.winVal_slider.valueChanged.connect(self.setWindowValue)
+        self.ui.levVal_slider.valueChanged.connect(self.setLevelValue)
+
+    def setWindowValue(self, value):
+        self.IMG_OBJ.WINDOW_VALUE = value
+        self.ui.winVal_label.setText(str(value))
+
+    def setLevelValue(self, value):
+        self.IMG_OBJ.LEVEL_VALUE = value
+        self.ui.levVal_label.setText(str(value))
+
     def widgetMouseMoveEvent(self, event, axis):
         x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
         
@@ -51,6 +64,9 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.ui.minIntensity_label.setNum(round(self.IMG_OBJ.MIN_MAX_INTENSITIES[0], 2))
         self.ui.maxIntensity_label.setNum(round(self.IMG_OBJ.MIN_MAX_INTENSITIES[1], 2))
         self.ui.curIntensity_label.setNum(round(self.IMG_OBJ.ORIG_NP_IMG[self.IMG_OBJ.FOC_POS[0], self.IMG_OBJ.FOC_POS[1], self.IMG_OBJ.FOC_POS[2]], 2))
+
+        self.setWindowValue(int(self.IMG_OBJ.WINDOW_VALUE))
+        self.setLevelValue(int(self.IMG_OBJ.LEVEL_VALUE))
 
     def exec(self):
         self.show()

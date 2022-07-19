@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'levelset_widgetwNgVtF.ui'
+## Form generated from reading UI file 'levelset_widgetmtqXPj.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -224,8 +224,8 @@ class Ui_levelset_widget(object):
         self.levelsetType_label.setText(QCoreApplication.translate("levelset_widget", u"Levelset Type", None))
         self.levelset2D_button.setText(QCoreApplication.translate("levelset_widget", u"2D", None))
         self.levelset3D_button.setText(QCoreApplication.translate("levelset_widget", u"3D", None))
-        self.levelsetLocal_button.setText(QCoreApplication.translate("levelset_widget", u"Auto", None))
-        self.levelsetAuto_button.setText(QCoreApplication.translate("levelset_widget", u"Local", None))
+        self.levelsetLocal_button.setText(QCoreApplication.translate("levelset_widget", u"Local", None))
+        self.levelsetAuto_button.setText(QCoreApplication.translate("levelset_widget", u"Auto", None))
         self.levelsetMu_label.setText(QCoreApplication.translate("levelset_widget", u"\u03bc value: 1.0-5.0", None))
         self.levelsetMu_textEdit.setHtml(QCoreApplication.translate("levelset_widget", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"

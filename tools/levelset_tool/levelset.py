@@ -56,9 +56,13 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
         return new_img
 
-    def runLevelSet(self, img, x_box, y_box, w_box, h_box, x_sel, y_sel, w_sel, h_sel):
+    def runLevelSet2D(self, img, x_box, y_box, w_box, h_box, x_sel, y_sel, w_sel, h_sel):
         lsf = np.ones((img.shape[0], img.shape[1]), img.dtype)
-        lsf[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel] = -1
+        if self.brush_type == 'auto':
+            pos = np.where(img[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel] == np.amax(img[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel]))
+            lsf[pos] = -1
+        else:
+            lsf[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel] = -1
         lsf = -lsf
 
         img = img[x_box:x_box+w_box, y_box:y_box+h_box]
@@ -66,9 +70,39 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
         norm_img = self.normMinMax(img)
 
-        lsf = runChanVese(norm_img, lsf, max_iter=100)
+        lsf = runChanVese(norm_img, lsf, max_iter=30)
 
         return (lsf >= 0).astype(float)
+
+    def runLevelSet3D(self, img, x_box, y_box, z_box, w_box, h_box, d_box, x_sel, y_sel, z_sel, w_sel, h_sel, d_sel):
+        lsf = np.ones((img.shape[0], img.shape[1], img.shape[2]), img.dtype)
+        lsf[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel, z_sel:z_sel+d_sel] = -1
+        lsf = -lsf
+
+        img = img[x_box:x_box+w_box, y_box:y_box+h_box, z_box:z_box+d_box]
+        lsf = lsf[x_box:x_box+w_box, y_box:y_box+h_box, z_box:z_box+d_box]
+
+        norm_img = self.normMinMax(img)
+
+        lsf = runChanVese(norm_img, lsf, max_iter=30)
+
+        return (lsf >= 0).astype(float)
+
+    def recursive(self, orig_msk, msk, x, y):
+        if orig_msk[x, y] == 0 or msk[x, y] == 1:
+            return msk
+
+        msk[x, y] = 1
+        if x > 0:
+            msk = self.recursive(orig_msk, msk, x-1, y)
+        if x < msk.shape[0]-1:
+            msk = self.recursive(orig_msk, msk, x+1, y)
+        if y > 0:
+            msk = self.recursive(orig_msk, msk, x, y-1)
+        if y < msk.shape[1]-1:
+            msk = self.recursive(orig_msk, msk, x, y+1)
+
+        return msk
 
     def widgetMouseMoveEvent(self, event, axis):
         x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
@@ -77,20 +111,45 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:
             ls_msk = None
-            if axis == 'axi':
-                ls_msk = self.runLevelSet(self.IMG_OBJ.NP_IMG[:, :, z], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
-                pos = (ls_msk > 0)
-                t_msk = self.MSK_OBJ.MSK[:, :, z]
-                xx, yy = xx-w//2, yy-h//2
-                t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
-                self.MSK_OBJ.MSK[:, :, z] = t_msk
-            elif axis == 'cor':
-                pass
-            elif axis == 'sag':
-                pass
+
+            if self.brush_dim == '2D':
+                if axis == 'axi':
+                    ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, :, z], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                    if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
+                    pos = (ls_msk > 0)
+                    t_msk = self.MSK_OBJ.MSK[:, :, z]
+                    xx, yy = xx-w//2, yy-h//2
+                    t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
+                    self.MSK_OBJ.MSK[:, :, z] = t_msk
+                elif axis == 'cor':
+                    ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[x, :, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                    if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
+                    pos = (ls_msk > 0)
+                    t_msk = self.MSK_OBJ.MSK[x, :, :]
+                    xx, yy = xx-w//2, yy-h//2
+                    t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
+                    self.MSK_OBJ.MSK[x, :, :] = t_msk
+                elif axis == 'sag':
+                    ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, y, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                    if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
+                    pos = (ls_msk > 0)
+                    t_msk = self.MSK_OBJ.MSK[:, y, :]
+                    xx, yy = xx-w//2, yy-h//2
+                    t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
+                    self.MSK_OBJ.MSK[:, y, :] = t_msk
+            
+            elif self.brush_dim == '3D':
+                w = min(w, h)
+                ls_msk = self.runLevelSet3D(self.IMG_OBJ.NP_IMG, x-w//2, y-w//2, z-w//2, w, w, w, x, y, z, 1, 1, 1)
+                print(ls_msk.shape)
 
         elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-            pass
+            if axis == 'axi':
+                self.MSK_OBJ.MSK[xx-w//2:xx+w//2, yy-h//2:yy+h//2, z] = 0
+            elif axis == 'cor':
+                self.MSK_OBJ.MSK[x, xx-w//2:xx+w//2, yy-h//2:yy+h//2] = 0
+            elif axis == 'sag':
+                self.MSK_OBJ.MSK[xx-w//2:xx+w//2, y, yy-h//2:yy+h//2] = 0
 
         elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
             diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
@@ -109,20 +168,15 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         s_y = s_y * zoom + margin[1]
         w = self.brush_size * zoom
         
-        if self.brush_type == 'auto':
+        if self.brush_type == 'local':
             painter.drawLine(new_point[0]-5, new_point[1],
-                             new_point[0]+5, new_point[1])
+                                new_point[0]+5, new_point[1])
             painter.drawLine(new_point[0], new_point[1]-5,
-                             new_point[0], new_point[1]+5)
-            painter.drawLine(s_x,s_y,s_x+w,s_y)
-            painter.drawLine(s_x,s_y,s_x,s_y+w)
-            painter.drawLine(s_x+w,s_y+w,s_x,s_y+w)
-            painter.drawLine(s_x+w,s_y+w,s_x+w,s_y)
+                                new_point[0], new_point[1]+5)
 
-        elif self.brush_type == 'local':
-            painter.drawLine(s_x,s_y,s_x+w,s_y)
-            painter.drawLine(s_x,s_y,s_x,s_y+w)
-            painter.drawLine(s_x+w,s_y+w,s_x,s_y+w)
-            painter.drawLine(s_x+w,s_y+w,s_x+w,s_y)
+        painter.drawLine(s_x,s_y,s_x+w,s_y)
+        painter.drawLine(s_x,s_y,s_x,s_y+w)
+        painter.drawLine(s_x+w,s_y+w,s_x,s_y+w)
+        painter.drawLine(s_x+w,s_y+w,s_x+w,s_y)
 
         return painter

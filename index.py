@@ -90,7 +90,10 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['levelset'].clicked.connect(lambda: self.update())
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
+        self.ui.actionOpen_Segmentation.triggered.connect(self.openSegmentationAction)
         self.ui.actionSave_As.triggered.connect(self.saveAsImageAction)
+        self.ui.actionUndo.triggered.connect(self.undoAction)
+        self.ui.actionRedo.triggered.connect(self.redoAction)
         self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
         self.ui.actionDebug.triggered.connect(self.debug)
 
@@ -166,6 +169,11 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.topRight_label.mousePressEvent = self.topRight_labelMousePressEvent
         self.ui.botLeft_label.mousePressEvent = self.botLeft_labelMousePressEvent
         self.ui.botRight_label.mousePressEvent = self.botRight_labelMousePressEvent
+
+        self.ui.topLeft_label.mouseReleaseEvent = self.labelMouseReleaseevent
+        self.ui.topRight_label.mouseReleaseEvent = self.labelMouseReleaseevent
+        self.ui.botLeft_label.mouseReleaseEvent = self.labelMouseReleaseevent
+        self.ui.botRight_label.mouseReleaseEvent = self.labelMouseReleaseevent
 
         self.ui.topLeft_label.mouseMoveEvent = self.topLeft_labelMouseMoveEvent
         self.ui.topRight_label.mouseMoveEvent = self.topRight_labelMouseMoveEvent
@@ -244,6 +252,17 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             filter=filter,
         )
 
+    def openSegmentationAction(self):
+        fp = self.getValidFilePath(prompt='Open Image', is_save=False)[0]
+        if not fp:
+            return
+
+        msk = nib.load(fp).get_fdata()
+        self.MSK_OBJ.newMsk(msk)
+        self.ui.segActiveLabel_combobox.clear()
+        self.ui.segActiveLabel_combobox.addItems(['Label ' + str(i) for i in self.MSK_OBJ.LBL_IDS])
+        self.ui.segActiveLabel_combobox.currentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
+
     def saveAsImageAction(self):
         fp = self.getValidFilePath(prompt='Save Image', filter='*.nii.gz;;*.nii', is_save=True)[0]
         print('Saving image to:', fp)
@@ -252,6 +271,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         
         msk_nib = nib.Nifti1Image(self.MSK_OBJ.MSK, self.IMG_OBJ.AFFINE, self.IMG_OBJ.HEADER)
         nib.save(msk_nib, fp)
+
+    def undoAction(self):
+        self.MSK_OBJ.undo()
+        self.update()
+
+    def redoAction(self):
+        self.MSK_OBJ.redo()
+        self.update()
 
     def openReorientDialog(self):
         self.reorientDialog.exec()
@@ -306,6 +333,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def botRight_labelMousePressEvent(self, event):
         self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
         self.botRight_labelMouseMoveEvent(event)
+
+    def labelMouseReleaseevent(self, event):
+        if self.TOOL_OBJ.ACTIVE_TOOL_NAME != 'curser': self.MSK_OBJ.updateMaskManager(self.MSK_OBJ.MSK)
 
     def labelMouseMoveEvent(self, event, axis):
         self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME].widgetMouseMoveEvent(event, axis)
@@ -415,14 +445,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.axi_worker.setArguments(
-            img = self.IMG_OBJ.NP_IMG[:, :, z],
+            img = self.IMG_OBJ.ORIG_NP_IMG[:, :, z].copy(),
             msk = self.MSK_OBJ.MSK[:, :, z],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
             tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
             shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
-            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_win = self.IMG_OBJ.WINDOW_VALUE,
             val_lev = self.IMG_OBJ.LEVEL_VALUE,
             img_flip = self.IMG_OBJ.IMG_FLIP['axi'],
             zoom = self.IMG_OBJ.ZOOM_FACTOR, 
@@ -433,14 +463,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.sag_worker.setArguments(
-            img = self.IMG_OBJ.NP_IMG[x, :, :],
+            img = self.IMG_OBJ.ORIG_NP_IMG[x, :, :].copy(),
             msk = self.MSK_OBJ.MSK[x, :, :],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
             tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
             shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
-            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_win = self.IMG_OBJ.WINDOW_VALUE,
             val_lev = self.IMG_OBJ.LEVEL_VALUE,
             img_flip = self.IMG_OBJ.IMG_FLIP['sag'],
             zoom = self.IMG_OBJ.ZOOM_FACTOR, 
@@ -451,14 +481,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         if self.IMG_OBJ.VIEWER_TYPE == 4:
             multi_size = (self.ui.topLeft_frame.width()-self.ui.topLeft_scrollBar.width(), self.ui.topLeft_frame.height()-self.ui.topLeftZoomToFit_button.height())
         self.cor_worker.setArguments(
-            img = self.IMG_OBJ.NP_IMG[:, y, :],
+            img = self.IMG_OBJ.ORIG_NP_IMG[:, y, :].copy(),
             msk = self.MSK_OBJ.MSK[:, y, :],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
             tool = self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME],
             shift_2d = [self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.SHIFT[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
-            val_win = self.IMG_OBJ.WINDOW_LEVEL,
+            val_win = self.IMG_OBJ.WINDOW_VALUE,
             val_lev = self.IMG_OBJ.LEVEL_VALUE,
             img_flip = self.IMG_OBJ.IMG_FLIP['cor'],
             zoom = self.IMG_OBJ.ZOOM_FACTOR, 

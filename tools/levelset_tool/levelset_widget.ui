@@ -154,14 +154,14 @@
      <item>
       <widget class="QPushButton" name="levelsetLocal_button">
        <property name="text">
-        <string>Auto</string>
+        <string>Local</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="levelsetAuto_button">
        <property name="text">
-        <string>Local</string>
+        <string>Auto</string>
        </property>
       </widget>
      </item>
