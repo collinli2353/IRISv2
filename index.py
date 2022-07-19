@@ -31,7 +31,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.setAcceptDrops(True)
 
-        themes = [
+        self.themes = [
+            'light',
             'dark_amber.xml',
             'dark_blue.xml',
             'dark_cyan.xml',
@@ -53,8 +54,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'light_yellow.xml'
             ]
 
-        # TODO: have a setting to change the theme
-        # apply_stylesheet(app, theme=themes[0])
+        self.theme_index = 0
 
         self.tools = OrderedDict({
             'curser': curser(),
@@ -88,6 +88,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['levelset'].clicked.connect(lambda: set_tool(2, 'levelset'))
         self.tool_buttons['levelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.tool_buttons['levelset'].clicked.connect(lambda: self.update())
+
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
         self.ui.actionOpen_Segmentation.triggered.connect(self.openSegmentationAction)
@@ -96,6 +97,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.actionRedo.triggered.connect(self.redoAction)
         self.ui.actionReorient_Image.triggered.connect(self.openReorientDialog)
         self.ui.actionDebug.triggered.connect(self.debug)
+        self.ui.actionSelect_Theme.triggered.connect(self.selectTheme)
 
         # Window actions
         def show_all_frames():
@@ -292,6 +294,33 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print('==================================================')
         print(self.MSK_OBJ)
         print('==================================================')
+
+    def selectTheme(self):
+        themes = [
+            'light',
+            'dark_amber.xml',
+            'dark_blue.xml',
+            'dark_cyan.xml',
+            'dark_lightgreen.xml',
+            'dark_pink.xml',
+            'dark_purple.xml',
+            'dark_red.xml',
+            'dark_teal.xml',
+            'dark_yellow.xml',
+            'light_amber.xml',
+            'light_blue.xml',
+            'light_cyan.xml',
+            'light_cyan_500.xml',
+            'light_lightgreen.xml',
+            'light_pink.xml',
+            'light_purple.xml',
+            'light_red.xml',
+            'light_teal.xml',
+            'light_yellow.xml'
+            ]
+
+        self.theme_index = (self.theme_index + 1) % len(themes)
+        apply_stylesheet(app, theme=themes[self.theme_index])
 
 
     # ================================================== #

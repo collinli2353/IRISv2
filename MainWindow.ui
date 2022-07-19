@@ -1074,6 +1074,7 @@
     </property>
     <addaction name="actionAbout_IRIS"/>
     <addaction name="actionDebug"/>
+    <addaction name="actionSelect_Theme"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1167,6 +1168,11 @@
   <action name="actionDebug">
    <property name="text">
     <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionSelect_Theme">
+   <property name="text">
+    <string>Select Theme</string>
    </property>
   </action>
  </widget>
