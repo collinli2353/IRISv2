@@ -16,7 +16,7 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.TOOL_OBJ = TOOL_OBJ()
 
     def widgetMouseMoveEvent(self, event, axis):
-        x, y, z = self.computePosition(event, axis)
+        x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:
             self.IMG_OBJ.FOC_POS = [x, y, z]

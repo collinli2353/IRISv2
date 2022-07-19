@@ -193,11 +193,16 @@ class MSK_OBJ(metaclass=Singleton):
     def addLabel(self):
         self.LBL_IDS.append(self.LBL_IDS[-1]+1)
         self.CURRENT_LBL = self.LBL_IDS[-1]
+    
+    def removeLabel(self):
+        if self.CURRENT_LBL == 0: return
+        self.LBL_IDS.pop(self.LBL_IDS.index(self.CURRENT_LBL)+1)
 
     def __str__(self):
         return f'''
 opa: {self.OPA}
-lbl ids: {np.unique(self.MSK)}
+lbl ids: {self.LBL_IDS}
+current lbl: {self.CURRENT_LBL}
         '''
 
 class TOOL_OBJ(metaclass=Singleton):

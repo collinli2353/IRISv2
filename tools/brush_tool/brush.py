@@ -39,58 +39,61 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.brush_size = int(value)
         self.ui.brushSize_label.setText(str(value))
 
-    def handlePaint(self, msk, brush_type, pos, isPaint):
-        s_x, s_y, w, lbl = pos[0]-self.brush_size//2, pos[1]-self.brush_size//2, self.brush_size, self.MSK_OBJ.CURRENT_LBL
+    def handlePaint(self, msk, brush_type, pos, w, h, isPaint):
+        s_x, s_y, lbl = pos[0]-w//2, pos[1]-h//2, self.MSK_OBJ.CURRENT_LBL
         if brush_type == 'square':
-            if isPaint: msk[s_x:s_x+w, s_y:s_y+w] = lbl
-            else: isPaint: msk[s_x:s_x+w, s_y:s_y+w] = 0
+            if isPaint: msk[s_x:s_x+w, s_y:s_y+h] = lbl
+            else: msk[s_x:s_x+w, s_y:s_y+h] = 0
         elif brush_type == 'circle':
-            t_msk = np.zeros([w,w])
-        
-        if w <=10 or w%2==0:        
-            if w<=1:
-                t_msk[0,0] = 1
-            elif w==3:
-                t_msk = octagon(1,1)
-            else:    
-                p2 = int(np.floor(w/3))
-                p1 = w-p2*2
-                t_msk = octagon(p1,p2)    
-            pos = (t_msk>0)
-            s_msk = msk[s_x:s_x+w,s_y:s_y+w]
-            if isPaint:
-                s_msk[pos]=lbl
-                msk[s_x:s_x+w,s_y:s_y+w] = s_msk 
+            w = min(w, h)
+            t_msk = np.zeros([w, w])
+
+            if w <=10 or w%2==0:        
+                if w<=1:
+                    t_msk[0,0] = 1
+                elif w==3:
+                    t_msk = octagon(1,1)
+                else:    
+                    p2 = int(np.floor(w/3))
+                    p1 = w-p2*2
+                    t_msk = octagon(p1,p2)    
+                pos = (t_msk>0)
+                s_msk = msk[s_x:s_x+w,s_y:s_y+w]
+                if isPaint:
+                    s_msk[pos]=lbl
+                    msk[s_x:s_x+w,s_y:s_y+w] = s_msk 
+                else:
+                    s_msk[pos]=0
+                    msk[s_x:s_x+w,s_y:s_y+w] = s_msk
             else:
-                s_msk[pos]=0
-                msk[s_x:s_x+w,s_y:s_y+w] = s_msk
-        else:
-            rr, cc = ellipse(s_x+w//2, s_y+w//2, w//2+1, w//2+1)
-            if isPaint:
-                msk[rr, cc] = lbl 
-            else: msk[rr, cc] = 0
+                rr, cc = ellipse(s_x+w//2, s_y+w//2, w//2+1, w//2+1)
+                if isPaint:
+                    msk[rr, cc] = lbl 
+                else: msk[rr, cc] = 0
 
         return msk
 
     def widgetMouseMoveEvent(self, event, axis):
-        x, y, z = self.computePosition(event, axis)
+        x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
+        xx, yy, w, h = self.computeCoords(xx, yy, self.brush_size, self.brush_size, margin, self.IMG_OBJ.ZOOM_FACTOR, shape)
+
         self.IMG_OBJ.POINT_POS = [x, y, z]
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:
             if axis == 'axi':
-                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [x, y], True)
+                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, True)
             elif axis == 'sag':
-                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [y, z], True)
+                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, True)
             elif axis == 'cor':
-                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [x, z], True)
+                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, True)
 
         elif event.buttons() & PySide6.QtCore.Qt.RightButton:
             if axis == 'axi':
-                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [x, y], False)
+                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, False)
             elif axis == 'sag':
-                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [y, z], False)
+                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, False)
             elif axis == 'cor':
-                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [x, z], False)
+                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, False)
 
         elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
             diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
@@ -101,7 +104,7 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
     def widgetDraw(self, pixmap, new_foc, new_point, zoom, margin, spacing, newshape):
         painter = QtGui.QPainter(pixmap)
-        painter.setPen(theBrushPen())
+        painter.setPen(theBrushPen(lbl=self.MSK_OBJ.CURRENT_LBL))
         cx, cy = new_point[0], new_point[1]          
         cx, cy = np.round((cx-margin[0])/zoom), np.round((cy-margin[1])/zoom)
         s_x, s_y = cx - self.brush_size // 2, cy - self.brush_size // 2 

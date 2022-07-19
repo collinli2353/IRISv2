@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'levelset_widgetCfIPtp.ui'
+## Form generated from reading UI file 'levelset_widgetwNgVtF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.1.0
 ##
@@ -17,9 +17,11 @@ class Ui_levelset_widget(object):
     def setupUi(self, levelset_widget):
         if not levelset_widget.objectName():
             levelset_widget.setObjectName(u"levelset_widget")
-        levelset_widget.resize(245, 391)
+        levelset_widget.resize(245, 446)
         self.verticalLayout = QVBoxLayout(levelset_widget)
+        self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.levelset_verticalSpacer = QSpacerItem(227, 12, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.verticalLayout.addItem(self.levelset_verticalSpacer)
@@ -29,47 +31,74 @@ class Ui_levelset_widget(object):
 
         self.verticalLayout.addWidget(self.levelsetDefualtSettngs_label)
 
+        self.levelsetBrushSizeTag_label = QLabel(levelset_widget)
+        self.levelsetBrushSizeTag_label.setObjectName(u"levelsetBrushSizeTag_label")
+
+        self.verticalLayout.addWidget(self.levelsetBrushSizeTag_label)
+
+        self.levelsetSize_frame = QFrame(levelset_widget)
+        self.levelsetSize_frame.setObjectName(u"levelsetSize_frame")
+        self.levelsetSize_frame.setFrameShape(QFrame.StyledPanel)
+        self.levelsetSize_frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_8 = QHBoxLayout(self.levelsetSize_frame)
+        self.horizontalLayout_8.setSpacing(0)
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.levelsetSize_label = QLabel(self.levelsetSize_frame)
+        self.levelsetSize_label.setObjectName(u"levelsetSize_label")
+
+        self.horizontalLayout_8.addWidget(self.levelsetSize_label)
+
+        self.levelsetSize_slider = QSlider(self.levelsetSize_frame)
+        self.levelsetSize_slider.setObjectName(u"levelsetSize_slider")
+        self.levelsetSize_slider.setMaximum(200)
+        self.levelsetSize_slider.setPageStep(1)
+        self.levelsetSize_slider.setValue(20)
+        self.levelsetSize_slider.setSliderPosition(20)
+        self.levelsetSize_slider.setOrientation(Qt.Horizontal)
+        self.levelsetSize_slider.setTickPosition(QSlider.TicksBothSides)
+        self.levelsetSize_slider.setTickInterval(5)
+
+        self.horizontalLayout_8.addWidget(self.levelsetSize_slider)
+
+
+        self.verticalLayout.addWidget(self.levelsetSize_frame)
+
         self.levelsetType_label = QLabel(levelset_widget)
         self.levelsetType_label.setObjectName(u"levelsetType_label")
         self.levelsetType_label.setMaximumSize(QSize(16777215, 15))
 
         self.verticalLayout.addWidget(self.levelsetType_label)
 
-        self.levelsetType_layout = QHBoxLayout()
-        self.levelsetType_layout.setObjectName(u"levelsetType_layout")
+        self.levelsetStyle_layout = QHBoxLayout()
+        self.levelsetStyle_layout.setObjectName(u"levelsetStyle_layout")
         self.levelset2D_button = QPushButton(levelset_widget)
         self.levelset2D_button.setObjectName(u"levelset2D_button")
 
-        self.levelsetType_layout.addWidget(self.levelset2D_button)
+        self.levelsetStyle_layout.addWidget(self.levelset2D_button)
 
         self.levelset3D_button = QPushButton(levelset_widget)
         self.levelset3D_button.setObjectName(u"levelset3D_button")
 
-        self.levelsetType_layout.addWidget(self.levelset3D_button)
+        self.levelsetStyle_layout.addWidget(self.levelset3D_button)
 
 
-        self.verticalLayout.addLayout(self.levelsetType_layout)
+        self.verticalLayout.addLayout(self.levelsetStyle_layout)
 
-        self.levelsetInvert_label = QLabel(levelset_widget)
-        self.levelsetInvert_label.setObjectName(u"levelsetInvert_label")
-        self.levelsetInvert_label.setMaximumSize(QSize(16777215, 15))
+        self.levelsetType_layout_2 = QHBoxLayout()
+        self.levelsetType_layout_2.setObjectName(u"levelsetType_layout_2")
+        self.levelsetLocal_button = QPushButton(levelset_widget)
+        self.levelsetLocal_button.setObjectName(u"levelsetLocal_button")
 
-        self.verticalLayout.addWidget(self.levelsetInvert_label)
+        self.levelsetType_layout_2.addWidget(self.levelsetLocal_button)
 
-        self.levelsetInvert_layout = QHBoxLayout()
-        self.levelsetInvert_layout.setObjectName(u"levelsetInvert_layout")
-        self.levelsetInvertTrue_button = QPushButton(levelset_widget)
-        self.levelsetInvertTrue_button.setObjectName(u"levelsetInvertTrue_button")
+        self.levelsetAuto_button = QPushButton(levelset_widget)
+        self.levelsetAuto_button.setObjectName(u"levelsetAuto_button")
 
-        self.levelsetInvert_layout.addWidget(self.levelsetInvertTrue_button)
-
-        self.levelsetInvertFalse_button = QPushButton(levelset_widget)
-        self.levelsetInvertFalse_button.setObjectName(u"levelsetInvertFalse_button")
-
-        self.levelsetInvert_layout.addWidget(self.levelsetInvertFalse_button)
+        self.levelsetType_layout_2.addWidget(self.levelsetAuto_button)
 
 
-        self.verticalLayout.addLayout(self.levelsetInvert_layout)
+        self.verticalLayout.addLayout(self.levelsetType_layout_2)
 
         self.levelsetMu_label = QLabel(levelset_widget)
         self.levelsetMu_label.setObjectName(u"levelsetMu_label")
@@ -190,12 +219,13 @@ class Ui_levelset_widget(object):
     def retranslateUi(self, levelset_widget):
         levelset_widget.setWindowTitle(QCoreApplication.translate("levelset_widget", u"Form", None))
         self.levelsetDefualtSettngs_label.setText(QCoreApplication.translate("levelset_widget", u"Default Settings", None))
+        self.levelsetBrushSizeTag_label.setText(QCoreApplication.translate("levelset_widget", u"Brush Size:", None))
+        self.levelsetSize_label.setText(QCoreApplication.translate("levelset_widget", u"#", None))
         self.levelsetType_label.setText(QCoreApplication.translate("levelset_widget", u"Levelset Type", None))
         self.levelset2D_button.setText(QCoreApplication.translate("levelset_widget", u"2D", None))
         self.levelset3D_button.setText(QCoreApplication.translate("levelset_widget", u"3D", None))
-        self.levelsetInvert_label.setText(QCoreApplication.translate("levelset_widget", u"Levelset Invert", None))
-        self.levelsetInvertTrue_button.setText(QCoreApplication.translate("levelset_widget", u"True", None))
-        self.levelsetInvertFalse_button.setText(QCoreApplication.translate("levelset_widget", u"False", None))
+        self.levelsetLocal_button.setText(QCoreApplication.translate("levelset_widget", u"Auto", None))
+        self.levelsetAuto_button.setText(QCoreApplication.translate("levelset_widget", u"Local", None))
         self.levelsetMu_label.setText(QCoreApplication.translate("levelset_widget", u"\u03bc value: 1.0-5.0", None))
         self.levelsetMu_textEdit.setHtml(QCoreApplication.translate("levelset_widget", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"

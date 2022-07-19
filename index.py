@@ -192,6 +192,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.segActiveLabel_combobox.currentIndexChanged.connect(self.segActiveLabelChanged)
         
         self.ui.segAddLabel_button.clicked.connect(self.segAddLabelPressed)
+        self.ui.segRemoveLabel_button.clicked.connect(self.segRemoveLabelPressed)
 
         self.init_scrollBars()
         self.update_scrollBars()
@@ -383,7 +384,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.update()
 
     def segActiveLabelChanged(self, index):
-        self.MSK_OBJ.ACTIVE_LABEL = index
+        self.MSK_OBJ.CURRENT_LBL = int(self.ui.segActiveLabel_combobox.currentText().split(' ')[-1])
         self.update()
 
     def segAddLabelPressed(self):
@@ -391,6 +392,10 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui.segActiveLabel_combobox.addItem('Label ' + str(self.MSK_OBJ.LBL_IDS[-1]))
         self.ui.segActiveLabel_combobox.setCurrentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
         self.update()
+
+    def segRemoveLabelPressed(self):
+        self.ui.segActiveLabel_combobox.removeItem(self.ui.segActiveLabel_combobox.currentIndex())
+        self.MSK_OBJ.removeLabel()
 
 
     # ================================================== #
