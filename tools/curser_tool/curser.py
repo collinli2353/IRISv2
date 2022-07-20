@@ -15,8 +15,6 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.IMG_OBJ = IMG_OBJ()
         self.TOOL_OBJ = TOOL_OBJ()
 
-        
-
         self.ui.winVal_slider.valueChanged.connect(self.setWindowValue)
         self.ui.levVal_slider.valueChanged.connect(self.setLevelValue)
 

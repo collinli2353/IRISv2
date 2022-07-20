@@ -14,6 +14,7 @@ from qt_material import *
 from imageProcessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
+from tools.brainLesionCNN_tool.brainLesionCNN import brainLesionCNN
 from tools.brush_tool.brush import brush
 from tools.curser_tool.curser import curser
 from tools.levelset_tool.levelset import levelset
@@ -60,12 +61,14 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'curser': curser(),
             'brush': brush(),
             'levelset': levelset(),
+            'brainLesionCNN': brainLesionCNN(),
         })
 
         self.tool_buttons = OrderedDict({
             'curser': self.ui.toolbar0_button,
             'brush': self.ui.toolbar1_button,
             'levelset': self.ui.toolbar2_button,
+            'brainLesionCNN': self.ui.toolbar3_button,
         })
 
         # Toolbar actions
@@ -88,6 +91,10 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['levelset'].clicked.connect(lambda: set_tool(2, 'levelset'))
         self.tool_buttons['levelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
         self.tool_buttons['levelset'].clicked.connect(lambda: self.update())
+
+        self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: set_tool(3, 'brainLesionCNN'))
+        self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
+        self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.update())
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
@@ -263,7 +270,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.MSK_OBJ.newMsk(msk)
         self.ui.segActiveLabel_combobox.clear()
         self.ui.segActiveLabel_combobox.addItems(['Label ' + str(i) for i in self.MSK_OBJ.LBL_IDS])
-        self.ui.segActiveLabel_combobox.currentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
+        self.ui.segActiveLabel_combobox.setCurrentIndex(len(self.MSK_OBJ.LBL_IDS)-1)
 
     def saveAsImageAction(self):
         fp = self.getValidFilePath(prompt='Save Image', filter='*.nii.gz;;*.nii', is_save=True)[0]
