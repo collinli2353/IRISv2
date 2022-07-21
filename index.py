@@ -16,6 +16,7 @@ from tools.brush_tool.brush import brush
 from tools.curser_tool.curser import curser
 from tools.levelset_tool.levelset import levelset
 from tools.smartclickCNN_tool.smartclickCNN import smartclickCNN
+from tools.smartclickLevelset_tool.smartclickLevelset import smartclickLevelset
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
@@ -61,6 +62,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'levelset': levelset(),
             'brainLesionCNN': brainLesionCNN(),
             'smartclickCNN': smartclickCNN(),
+            'smartclickLevelset': smartclickLevelset(),
         })
 
         self.tool_buttons = OrderedDict({
@@ -69,6 +71,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'levelset': self.ui.toolbar2_button,
             'brainLesionCNN': self.ui.toolbar3_button,
             'smartclickCNN': self.ui.toolbar4_button,
+            'smartclickLevelset': self.ui.toolbar5_button,
         })
 
         # Toolbar actions
@@ -99,6 +102,10 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['smartclickCNN'].clicked.connect(lambda: set_tool(4, 'smartclickCNN'))
         self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
         self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.update())
+
+        self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: set_tool(5, 'smartclickLevelset'))
+        self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
+        self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: self.update())
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
