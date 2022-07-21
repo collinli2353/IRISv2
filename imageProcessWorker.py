@@ -18,7 +18,7 @@ class ImageProcessWorker(QtCore.QThread):
         super(ImageProcessWorker, self).__init__()
 
     def setArguments(self,
-                     img, msk, opa,
+                     img, msk, temp_msk, opa,
                      foc_pos_2d, point_pos_2d, tool, shift_2d,
                      val_win, val_lev,
                      img_flip, zoom, viewer_size,
@@ -28,6 +28,7 @@ class ImageProcessWorker(QtCore.QThread):
         self.args = OrderedDict({
             'img': img,
             'msk': msk,
+            'temp_msk': temp_msk,
             'opa': opa,
             'foc_pos_2d': foc_pos_2d,
             'point_pos_2d': point_pos_2d,
@@ -41,17 +42,18 @@ class ImageProcessWorker(QtCore.QThread):
             'rai_display_letters': rai_display_letters
         })
 
-    def transform(self, img, msk, foc_pos_2d, point_pos_2d, img_flip):
+    def transform(self, img, msk, temp_msk, foc_pos_2d, point_pos_2d, img_flip):
         img_size = img.shape
         for axis, bool_flip in enumerate(img_flip):
             if bool_flip:
                 img = np.flip(img, axis)
                 msk = np.flip(msk, axis)
+                temp_msk = np.flip(temp_msk, axis)
 
                 foc_pos_2d[axis] = img_size[axis] - foc_pos_2d[axis] - 1
                 point_pos_2d[axis] = img_size[axis] - point_pos_2d[axis] - 1
 
-        return img, msk, foc_pos_2d, point_pos_2d
+        return img, msk, temp_msk, foc_pos_2d, point_pos_2d
 
     def mapLabelToRGB(self, msk):
 
@@ -71,23 +73,29 @@ class ImageProcessWorker(QtCore.QThread):
 
     def run(self):
 
-        img, msk, opa, foc_pos_2d, point_pos_2d, tool, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
+        img, msk, temp_msk, opa, foc_pos_2d, point_pos_2d, tool, shift_2d, val_win, val_lev, img_flip, zoom, viewer_size, rai_display_letters = self.args.values()
 
         val_max = val_lev + val_win / 2
         val_min = val_lev - val_win / 2
 
-        img, msk, foc_pos_2d, point_pos_2d = self.transform(img, msk, foc_pos_2d, point_pos_2d, img_flip)
+        img, msk, temp_msk, foc_pos_2d, point_pos_2d = self.transform(img, msk, temp_msk, foc_pos_2d, point_pos_2d, img_flip)
         img[img > val_max] = val_max
         img[img < val_min] = val_min
         img = (img - val_min)/(val_max-val_min+1e-5)
         img = np.stack([img.T, img.T, img.T], axis=-1)
         msk_pos = (msk > 0).astype(float)
+        temp_msk_pos = (temp_msk > 0).astype(float)
 
         r, g, b = self.mapLabelToRGB(msk)
         msk = np.stack([r.T, g.T, b.T], axis=-1)
         msk_pos = np.stack([r.T, g.T, b.T], axis=-1)
 
+        r, g, b = self.mapLabelToRGB(temp_msk)
+        temp_msk = np.stack([r.T, g.T, b.T], axis=-1)
+        temp_msk_pos = np.stack([r.T, g.T, b.T], axis=-1)
+
         img = img * (1. - msk_pos * opa / 100.) + msk * opa / 100.
+        img = img * (1. - temp_msk_pos) + temp_msk
 
         img = (img * 255.).astype('uint8')
         img = Image.fromarray(img, mode='RGB')

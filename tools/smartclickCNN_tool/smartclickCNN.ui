@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>smartclickCNN_widget</class>
+ <widget class="QWidget" name="smartclickCNN_widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>94</width>
+    <height>102</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QPushButton" name="segment_button">
+     <property name="text">
+      <string>Segment</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="refine_button">
+     <property name="text">
+      <string>Refine</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="clearSeeds_button">
+     <property name="text">
+      <string>Clear Seeds</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -18,7 +18,7 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.TOOL_OBJ = TOOL_OBJ()
 
         self.brush_size = 20
-        self.brush_type = 'auto'
+        self.brush_type = 'local'
         self.brush_dim = '2D'
 
         def setBrushType(type, dim):
@@ -110,8 +110,6 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.IMG_OBJ.POINT_POS = [x, y, z]
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-            ls_msk = None
-
             if self.brush_dim == '2D':
                 if axis == 'axi':
                     ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, :, z], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
@@ -169,13 +167,13 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         w = self.brush_size * zoom
         
         if self.brush_type == 'local':
-            painter.drawLine(new_point[0]-5, new_point[1],
-                                new_point[0]+5, new_point[1])
-            painter.drawLine(new_point[0], new_point[1]-5,
-                                new_point[0], new_point[1]+5)
+            painter.drawLine(int(new_point[0]+spacing/2-5), int(new_point[1]+spacing/2),
+                            int(new_point[0]+spacing/2+5), int(new_point[1]+spacing/2))
+            painter.drawLine(int(new_point[0]+spacing/2), int(new_point[1]+spacing/2-5),
+                            int(new_point[0]+spacing/2), int(new_point[1]+spacing/2+5))
 
-        painter.drawLine(s_x,s_y,s_x+w,s_y)
         painter.drawLine(s_x,s_y,s_x,s_y+w)
+        painter.drawLine(s_x,s_y,s_x+w,s_y)
         painter.drawLine(s_x+w,s_y+w,s_x,s_y+w)
         painter.drawLine(s_x+w,s_y+w,s_x+w,s_y)
 

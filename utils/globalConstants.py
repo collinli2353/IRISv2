@@ -176,6 +176,7 @@ is dicom: {self.IS_DICOM}
 
 class MSK_OBJ(metaclass=Singleton):
     MSK = None
+    TEMP_MSK = None
     OPA = None
     LBL_IDS = [0, 1]
     CURRENT_LBL = 1
@@ -183,6 +184,7 @@ class MSK_OBJ(metaclass=Singleton):
 
     def __init__(self):
         self.MSK = np.zeros([100, 100, 100])
+        self.TEMP_MSK = np.zeros([100, 100, 100])
         self.OPA = 50
         self.LBL_IDS = [0, 1]
         self.CURRENT_LBL = 1
@@ -190,9 +192,11 @@ class MSK_OBJ(metaclass=Singleton):
 
     def newMsk(self, msk):
         self.MSK = msk
+        self.TEMP_MSK = np.zeros_like(self.MSK)
         self.OPA = 50
         self.LBL_IDS = [int(i) for i in np.unique(self.MSK)]
         self.CURRENT_LBL = self.LBL_IDS[-1]
+        self.addLabel()
         self.maskChangeManager = maskManager()
 
     def updateMaskManager(self, msk):

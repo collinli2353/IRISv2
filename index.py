@@ -1,8 +1,5 @@
-from collections import OrderedDict
-import os
 import sys
-from enum import Enum
-from tkinter.font import BOLD
+from collections import OrderedDict
 
 import nibabel as nib
 import numpy as np
@@ -11,13 +8,14 @@ from PIL import Image, ImageQt
 from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtGui import QColor as rgb
 from qt_material import *
-from imageProcessWorker import ImageProcessWorker
 
 from dialogs.reorientImageDialog import ReorientImageDialog
+from imageProcessWorker import ImageProcessWorker
 from tools.brainLesionCNN_tool.brainLesionCNN import brainLesionCNN
 from tools.brush_tool.brush import brush
 from tools.curser_tool.curser import curser
 from tools.levelset_tool.levelset import levelset
+from tools.smartclickCNN_tool.smartclickCNN import smartclickCNN
 # from qtredux.Component import qtComponent
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
@@ -62,6 +60,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'brush': brush(),
             'levelset': levelset(),
             'brainLesionCNN': brainLesionCNN(),
+            'smartclickCNN': smartclickCNN(),
         })
 
         self.tool_buttons = OrderedDict({
@@ -69,6 +68,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
             'brush': self.ui.toolbar1_button,
             'levelset': self.ui.toolbar2_button,
             'brainLesionCNN': self.ui.toolbar3_button,
+            'smartclickCNN': self.ui.toolbar4_button,
         })
 
         # Toolbar actions
@@ -95,6 +95,10 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: set_tool(3, 'brainLesionCNN'))
         self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
         self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.update())
+
+        self.tool_buttons['smartclickCNN'].clicked.connect(lambda: set_tool(4, 'smartclickCNN'))
+        self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
+        self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.update())
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
@@ -240,9 +244,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
     def openImage(self, fp):
         self.IMG_OBJ.__loadImage__(fp)
-        self.MSK_OBJ.MSK = np.zeros(self.IMG_OBJ.SHAPE)
-
         # TODO: new image, new mask, ask prompt to save old mask
+        self.MSK_OBJ.MSK = np.zeros(self.IMG_OBJ.SHAPE)
+        self.MSK_OBJ.TEMP_MSK = np.zeros(self.IMG_OBJ.SHAPE)
 
         self.init_scrollBars()
         self.update_scrollBars()
@@ -483,6 +487,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.axi_worker.setArguments(
             img = self.IMG_OBJ.ORIG_NP_IMG[:, :, z].copy(),
             msk = self.MSK_OBJ.MSK[:, :, z],
+            temp_msk = self.MSK_OBJ.TEMP_MSK[:, :, z],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['axi'][1]]],
@@ -501,6 +506,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.sag_worker.setArguments(
             img = self.IMG_OBJ.ORIG_NP_IMG[x, :, :].copy(),
             msk = self.MSK_OBJ.MSK[x, :, :],
+            temp_msk = self.MSK_OBJ.TEMP_MSK[x, :, :],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['sag'][1]]],
@@ -519,6 +525,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.cor_worker.setArguments(
             img = self.IMG_OBJ.ORIG_NP_IMG[:, y, :].copy(),
             msk = self.MSK_OBJ.MSK[:, y, :],
+            temp_msk = self.MSK_OBJ.TEMP_MSK[:, y, :],
             opa = self.MSK_OBJ.OPA,
             foc_pos_2d = [self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.FOC_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
             point_pos_2d = [self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][0]], self.IMG_OBJ.POINT_POS[self.IMG_OBJ.AXISMAPPING['cor'][1]]],
