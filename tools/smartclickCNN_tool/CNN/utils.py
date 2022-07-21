@@ -147,8 +147,8 @@ def interaction_geodesic_distance(img, seed, threshold=0):
         # I = itensity_normalize_one_volume(img)
         I = np.asanyarray(img, np.float32)
         S = seed
-        geo_dis = GeodisTK.geodesic2d_fast_marching(I, S)
-        # geo_dis = GeodisTK.geodesic2d_raster_scan(I, S, 1.0, 2.0)
+        # geo_dis = GeodisTK.geodesic2d_fast_marching(I, S)
+        geo_dis = GeodisTK.geodesic2d_raster_scan(I, S, 1.0, 2.0)
         if threshold > 0:
             geo_dis[geo_dis > threshold] = threshold
             geo_dis = geo_dis / threshold

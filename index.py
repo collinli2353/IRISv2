@@ -4,9 +4,6 @@ from collections import OrderedDict
 import nibabel as nib
 import numpy as np
 import PySide6
-from PIL import Image, ImageQt
-from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtGui import QColor as rgb
 from qt_material import *
 
 from dialogs.reorientImageDialog import ReorientImageDialog
@@ -17,7 +14,6 @@ from tools.curser_tool.curser import curser
 from tools.levelset_tool.levelset import levelset
 from tools.smartclickCNN_tool.smartclickCNN import smartclickCNN
 from tools.smartclickLevelset_tool.smartclickLevelset import smartclickLevelset
-# from qtredux.Component import qtComponent
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
 from utils.utils import clamp, lettersPen, theCrossPen
@@ -30,29 +26,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.setAcceptDrops(True)
-
-        self.themes = [
-            'light',
-            'dark_amber.xml',
-            'dark_blue.xml',
-            'dark_cyan.xml',
-            'dark_lightgreen.xml',
-            'dark_pink.xml',
-            'dark_purple.xml',
-            'dark_red.xml',
-            'dark_teal.xml',
-            'dark_yellow.xml',
-            'light_amber.xml',
-            'light_blue.xml',
-            'light_cyan.xml',
-            'light_cyan_500.xml',
-            'light_lightgreen.xml',
-            'light_pink.xml',
-            'light_purple.xml',
-            'light_red.xml',
-            'light_teal.xml',
-            'light_yellow.xml'
-            ]
 
         self.theme_index = 0
 
@@ -78,34 +51,19 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         def set_tool(index, tool_name):
             self.TOOL_OBJ.ACTIVE_TOOL_NAME = tool_name
             self.TOOL_OBJ.ACTIVE_TOOL_INDEX = index
+            self.ui.stackedWidget.setCurrentIndex(index)
+            self.update()
             print('switching tool to', tool_name, index)
 
         for index, tool_name in enumerate(self.tools):
             self.ui.stackedWidget.addWidget(self.tools[tool_name])
 
         self.tool_buttons['curser'].clicked.connect(lambda: set_tool(0, 'curser'))
-        self.tool_buttons['curser'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
-        self.tool_buttons['curser'].clicked.connect(lambda: self.update())
-
         self.tool_buttons['brush'].clicked.connect(lambda: set_tool(1, 'brush'))
-        self.tool_buttons['brush'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(1))
-        self.tool_buttons['brush'].clicked.connect(lambda: self.update())
-
         self.tool_buttons['levelset'].clicked.connect(lambda: set_tool(2, 'levelset'))
-        self.tool_buttons['levelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(2))
-        self.tool_buttons['levelset'].clicked.connect(lambda: self.update())
-
         self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: set_tool(3, 'brainLesionCNN'))
-        self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(3))
-        self.tool_buttons['brainLesionCNN'].clicked.connect(lambda: self.update())
-
         self.tool_buttons['smartclickCNN'].clicked.connect(lambda: set_tool(4, 'smartclickCNN'))
-        self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(4))
-        self.tool_buttons['smartclickCNN'].clicked.connect(lambda: self.update())
-
         self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: set_tool(5, 'smartclickLevelset'))
-        self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(5))
-        self.tool_buttons['smartclickLevelset'].clicked.connect(lambda: self.update())
 
         # Menubar actions
         self.ui.actionOpen_Image.triggered.connect(self.openImageAction)
@@ -243,6 +201,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     # Menubar Actions ================================== #
     # ================================================== #
+
     def openImageAction(self):
         fp = self.getValidFilePath(prompt='Open Image', is_save=False)[0]
         if not fp:
@@ -250,15 +209,20 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.openImage(fp)
 
     def openImage(self, fp):
+        if self.MSK_OBJ.MSK.sum() > 0:
+            ret = PySide6.QtWidgets.QMessageBox.question(self, '', 'Have you saved your current mask?' , PySide6.QtWidgets.QMessageBox.Yes | PySide6.QtWidgets.QMessageBox.No)
+
+            if ret == PySide6.QtWidgets.QMessageBox.No:
+                return
         self.IMG_OBJ.__loadImage__(fp)
+
         # TODO: new image, new mask, ask prompt to save old mask
         self.MSK_OBJ.MSK = np.zeros(self.IMG_OBJ.SHAPE)
         self.MSK_OBJ.TEMP_MSK = np.zeros(self.IMG_OBJ.SHAPE)
 
         self.init_scrollBars()
         self.update_scrollBars()
-        self.update()
-        
+        self.update()        
 
     def getValidFilePath(self, prompt='', filter='Default(*.nii *.nii.gz *.dcm);;*.nii.gz;;*.nii;;*dcm;;All Files(*)', is_save=False):
         if is_save:
@@ -339,7 +303,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
 
         self.theme_index = (self.theme_index + 1) % len(themes)
         apply_stylesheet(app, theme=themes[self.theme_index])
-
 
     # ================================================== #
     # KeyPress Events ================================== #

@@ -6,7 +6,7 @@ import maxflow
 from scipy import ndimage
 from scipy.ndimage import zoom
 from skimage import measure
-from tools.levelset_tool.ChanVese import runChanVese
+from tools.levelset_tool.ChanVese import runChanVese2D
 from tools.smartclickCNN_tool.CNN.network import UNet
 from tools.smartclickCNN_tool.CNN.utils import (add_countor, add_overlay, cropped_image, extends_points,
                                                           extreme_points, get_bbox, get_largest_two_component,
@@ -69,15 +69,11 @@ class tool():
         axs[0, 1].imshow(cropped_geos, cmap='gray')
         axs[1, 0].imshow(cropped_seed, interpolation='none')
 
-        Prob = runChanVese(normal_img, cropped_seed, max_iter=15)
-
-        # crf_param = (5.0, 0.1)
-        # fix_predict = maxflow.maxflow2d(normal_img, Prob, crf_param)
-        fix_predict = Prob
+        Prob = runChanVese2D(normal_img, cropped_geos, max_iter=20)
         
         pred = np.zeros_like(np_img, dtype=np.float)
 
-        pred[bbox[0]:bbox[2], bbox[1]:bbox[3]] = fix_predict
+        pred[bbox[0]:bbox[2], bbox[1]:bbox[3]] = Prob
 
         pred[pred >= 0.5] = 1
         pred[pred < 0.5] = 0
@@ -91,7 +87,6 @@ class tool():
         seg = ndimage.binary_fill_holes(seg)
 
         seg = np.array(seg, np.uint8)
-        axs[1,1].imshow(fix_predict)
         plt.show()
 
         return seg

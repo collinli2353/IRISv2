@@ -106,10 +106,8 @@ class ImageProcessWorker(QtCore.QThread):
         foc_pos_2d = [pos*zoom_factor for pos in foc_pos_2d]
         point_pos_2d = [pos*zoom_factor for pos in point_pos_2d]
 
-        newshape = (round(shape[0] * zoom_factor),
-                    (round(shape[1] * zoom_factor)))
-        margin = ((size[0] - newshape[0]) // 2+shift_2d[0],
-                  (size[1] - newshape[1]) // 2+shift_2d[1])
+        newshape = (round(shape[0] * zoom_factor), (round(shape[1] * zoom_factor)))
+        margin = ((size[0] - newshape[0]) // 2+shift_2d[0], (size[1] - newshape[1]) // 2+shift_2d[1])
         scaled_img = img.resize(newshape, resample=Image.NEAREST)
         final_img = Image.new(scaled_img.mode, size, color='black')
         final_img.paste(scaled_img, margin)
