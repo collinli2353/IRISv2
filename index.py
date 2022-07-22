@@ -368,19 +368,15 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] = clamp(0, self.IMG_OBJ.FOC_POS[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] - 1, self.IMG_OBJ.SHAPE[self.IMG_OBJ.VIEWER_INDEX_MAPPING[axis]] - 1)
 
     def topLeft_labelWheelEvent(self, event):
-        if event.angleDelta().y() > 0:
-            self.decreaseFocPos('topLeft')
-        else:
-            self.increaseFocPos('topLeft')
+        if event.angleDelta().y() > 0: self.decreaseFocPos('topLeft')
+        else: self.increaseFocPos('topLeft')
 
         self.update_scrollBars()
         self.update()
 
     def topRight_labelWheelEvent(self, event):
-        if event.angleDelta().y() > 0:
-            self.decreaseFocPos('topRight')
-        else:
-            self.increaseFocPos('topRight')
+        if event.angleDelta().y() > 0: self.decreaseFocPos('topRight')
+        else: self.increaseFocPos('topRight')
 
         self.update_scrollBars()
         self.update()
@@ -389,10 +385,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         print('botLeft_labelWheelEvent', event.angleDelta())
 
     def botRight_labelWheelEvent(self, event):
-        if event.angleDelta().y() > 0:
-            self.decreaseFocPos('botRight')
-        else:
-            self.increaseFocPos('botRight')
+        if event.angleDelta().y() > 0: self.decreaseFocPos('botRight')
+        else: self.increaseFocPos('botRight')
 
         self.update_scrollBars()
         self.update()
@@ -418,7 +412,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     # Label Events ==================================== #
     # ================================================== #
-
     def opa_sliderValueChanged(self, value):
         self.MSK_OBJ.OPA = value
         self.ui.segOpa_label.setText(str(value))
@@ -444,9 +437,7 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     def update(self):
         self.update_scrollBarLabels()
-
         self.tools[self.TOOL_OBJ.ACTIVE_TOOL_NAME].widgetUpdate()
-
         self.update_viewers()
 
     def update_viewers(self):

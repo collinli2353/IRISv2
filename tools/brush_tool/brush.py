@@ -15,13 +15,18 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.ui.setupUi(self)
         self.setupGlobalConstants()
 
+        # Setup Local Constants
+        self.brush_type = 'square'  
+        self.brush_size = 5
+        self.ui.brushSize_slider.setValue(int(self.brush_size))
+        self.ui.brushSize_label.setText(str(self.brush_size))
+
         def setBrushType(type):
             self.brush_type = type
             self.IMG_OBJ.UPDATE_VIEWERS()
 
         def setBrushSize(value):
             self.brush_size = int(value)
-            self.ui.brushSize_slider.setValue(int(value))
             self.ui.brushSize_label.setText(str(value))
             self.IMG_OBJ.UPDATE_VIEWERS()
 
@@ -29,12 +34,6 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.ui.brushStyleCircle_button.clicked.connect(lambda: setBrushType('circle'))
 
         self.ui.brushSize_slider.valueChanged.connect(setBrushSize)
-
-        # Setup Local Constants
-        self.brush_type = 'square'  
-        self.brush_size = 5
-        self.ui.brushSize_slider.setValue(int(self.brush_size))
-        self.ui.brushSize_label.setText(str(self.brush_size))
 
     def handlePaint(self, msk, brush_type, pos, w, h, isPaint):
         s_x, s_y, lbl = pos[0]-w//2, pos[1]-h//2, self.MSK_OBJ.CURRENT_LBL

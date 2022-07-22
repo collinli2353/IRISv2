@@ -20,7 +20,7 @@ class Ui_MainWindow(object):
         MainWindow.resize(960, 640)
         MainWindow.setMinimumSize(QSize(960, 640))
         icon = QIcon()
-        icon.addFile(u"../../../../.designer/backup/icons/Cornell_University_seal.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u"./icons/Cornell_University_seal.svg", QSize(), QIcon.Normal, QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setTabShape(QTabWidget.Rounded)

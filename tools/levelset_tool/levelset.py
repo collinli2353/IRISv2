@@ -13,6 +13,13 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.ui.setupUi(self)
         self.setupGlobalConstants()
 
+        # Setup Local Constants
+        self.brush_size = 15
+        self.brush_type = 'local'
+        self.brush_dim = '2D'
+        self.ui.levelsetSize_label.setText(str(self.brush_size))
+        self.ui.levelsetSize_slider.setValue(int(self.brush_size))
+
         def setBrushType(type, dim):
             self.brush_type = type
             self.brush_dim = dim
@@ -29,10 +36,6 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         self.ui.levelsetLocal_button.clicked.connect(lambda: setBrushType('local', self.brush_dim))
 
         self.ui.levelsetSize_slider.valueChanged.connect(setBrushSize)
-
-        self.brush_size = 15
-        self.brush_type = 'local'
-        self.brush_dim = '2D'
 
     def normMinMax(self, img, msk=None, p_val=None, ll=0, rr=255):
         new_img = np.zeros(img.shape)
