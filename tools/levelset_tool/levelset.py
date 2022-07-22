@@ -59,6 +59,7 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
     def runLevelSet2D(self, img, x_box, y_box, w_box, h_box, x_sel, y_sel, w_sel, h_sel):
         lsf = np.ones((img.shape[0], img.shape[1]), img.dtype)
         if self.brush_type == 'auto':
+            print(np.amax(img[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel]))
             pos = np.where(img[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel] == np.amax(img[x_sel:x_sel+w_sel, y_sel:y_sel+h_sel]))
             lsf[pos] = -1
         else:
@@ -133,36 +134,37 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
             if self.brush_dim == '2D':
                 if axis == 'axi':
                     ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, :, z], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                    print(ls_msk.sum())
                     if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
                     pos = (ls_msk > 0)
                     t_msk = self.MSK_OBJ.MSK[:, :, z]
                     xx, yy = xx-w//2, yy-h//2
                     t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
                     self.MSK_OBJ.MSK[:, :, z] = t_msk
-                elif axis == 'cor':
-                    ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[x, :, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
-                    if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
-                    pos = (ls_msk > 0)
-                    t_msk = self.MSK_OBJ.MSK[x, :, :]
-                    xx, yy = xx-w//2, yy-h//2
-                    t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
-                    self.MSK_OBJ.MSK[x, :, :] = t_msk
-                elif axis == 'sag':
-                    ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, y, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
-                    if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
-                    pos = (ls_msk > 0)
-                    t_msk = self.MSK_OBJ.MSK[:, y, :]
-                    xx, yy = xx-w//2, yy-h//2
-                    t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
-                    self.MSK_OBJ.MSK[:, y, :] = t_msk
+                # elif axis == 'cor':
+                #     ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[x, :, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                #     if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
+                #     pos = (ls_msk > 0)
+                #     t_msk = self.MSK_OBJ.MSK[x, :, :]
+                #     xx, yy = xx-w//2, yy-h//2
+                #     t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
+                #     self.MSK_OBJ.MSK[x, :, :] = t_msk
+                # elif axis == 'sag':
+                #     ls_msk = self.runLevelSet2D(self.IMG_OBJ.NP_IMG[:, y, :], xx-w//2, yy-h//2, w, h, xx, yy, 1, 1)
+                #     if self.brush_type == 'local': ls_msk = self.recursive(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2)
+                #     pos = (ls_msk > 0)
+                #     t_msk = self.MSK_OBJ.MSK[:, y, :]
+                #     xx, yy = xx-w//2, yy-h//2
+                #     t_msk[xx:xx+w, yy:yy+h][pos] = self.MSK_OBJ.CURRENT_LBL
+                #     self.MSK_OBJ.MSK[:, y, :] = t_msk
             
             elif self.brush_dim == '3D':
                 w = min(w, h)
-                ls_msk = self.runLevelSet3D(self.IMG_OBJ.NP_IMG, x-w//2, y-w//2, z-w//2, w, w, w, x, y, z, 1, 1, 1)
+                ls_msk = self.runLevelSet3D(self.IMG_OBJ.NP_IMG, x-w//2, y-w//2, z-4//2, w, w, 4, x, y, z, 1, 1, 1)
                 # if self.brush_type == 'local': ls_msk = self.recursive3D(ls_msk, np.zeros(ls_msk.shape, dtype=int), ls_msk.shape[0]//2, ls_msk.shape[1]//2, ls_msk.shape[2]//2)
                 pos = (ls_msk > 0)
-                x, y, z = x-w//2, y-w//2, z-w//2
-                self.MSK_OBJ.MSK[x:x+w, y:y+w, z:z+w][pos] = self.MSK_OBJ.CURRENT_LBL
+                x, y, z = x-w//2, y-w//2, z-4//2
+                self.MSK_OBJ.MSK[x:x+w, y:y+w, z:z+4][pos] = self.MSK_OBJ.CURRENT_LBL
 
         elif event.buttons() & PySide6.QtCore.Qt.RightButton:
             if axis == 'axi':

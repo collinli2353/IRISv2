@@ -53,8 +53,8 @@ def iterateChanVese3D(lsf, img, mu, nu, epison, step):
     Nz = Iz / (s+1e-6)
     Mxx, Nxx, Oxx = np.gradient(Nx)
     Myy, Nyy, Ozz = np.gradient(Ny)
-    Mzz, Ozz, Nzz = np.gradient(Nz)
-    cur = Nxx + Nyy + Nzz
+    Mzz, Nzz, Ozz = np.gradient(Nz)
+    cur = Nxx + Myy + Ozz
     Length = nu*Drc*cur
 
     Lap = cv2.Laplacian(lsf, -1)

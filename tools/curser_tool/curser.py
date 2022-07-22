@@ -20,11 +20,15 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
     def setWindowValue(self, value):
         self.IMG_OBJ.WINDOW_VALUE = value
+        self.ui.winVal_slider.setValue(value)
         self.ui.winVal_label.setText(str(value))
+        self.IMG_OBJ.UPDATE_VIEWERS()
 
     def setLevelValue(self, value):
         self.IMG_OBJ.LEVEL_VALUE = value
+        self.ui.levVal_slider.setValue(value)
         self.ui.levVal_label.setText(str(value))
+        self.IMG_OBJ.UPDATE_VIEWERS()
 
     def widgetMouseMoveEvent(self, event, axis):
         x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)

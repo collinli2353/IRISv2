@@ -69,7 +69,7 @@ class tool():
         axs[0, 1].imshow(cropped_geos, cmap='gray')
         axs[1, 0].imshow(cropped_seed, interpolation='none')
 
-        Prob = runChanVese2D(normal_img, cropped_geos, max_iter=20)
+        Prob = runChanVese2D(normal_img, cropped_img, max_iter=20)
         
         pred = np.zeros_like(np_img, dtype=np.float)
 

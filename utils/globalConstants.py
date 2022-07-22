@@ -37,6 +37,8 @@ class IMG_OBJ(metaclass=Singleton):
     VIEWER_TYPE = None
     IS_DICOM = None
 
+    UPDATE_VIEWERS = None
+
     def __init__(self):
         self.FP = None
         self.NIBABEL_IMG = None

@@ -16,7 +16,7 @@ from tools.smartclickCNN_tool.smartclickCNN import smartclickCNN
 from tools.smartclickLevelset_tool.smartclickLevelset import smartclickLevelset
 from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
-from utils.utils import clamp, lettersPen, theCrossPen
+from utils.utils import clamp
 
 
 class MainWindow(PySide6.QtWidgets.QMainWindow):
@@ -191,6 +191,8 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.TOOL_OBJ = TOOL_OBJ()
         self.reorientDialog = ReorientImageDialog()
 
+        self.IMG_OBJ.UPDATE_VIEWERS = self.update_viewers
+
         self.axi_worker = ImageProcessWorker()
         self.sag_worker = ImageProcessWorker()
         self.cor_worker = ImageProcessWorker()
@@ -201,7 +203,6 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     # Menubar Actions ================================== #
     # ================================================== #
-
     def openImageAction(self):
         fp = self.getValidFilePath(prompt='Open Image', is_save=False)[0]
         if not fp:

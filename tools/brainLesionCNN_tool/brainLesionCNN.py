@@ -38,11 +38,11 @@ class brainLesionCNN(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
     def segment_button_clicked(self):
         self.IMG_OBJ.__loadImage__(self.tl_fp)
-        self.MSK_OBJ.newMsk(run_segmentation(self.t1_fp, self.t2_fp, self.tl_fp, '.\\tools\\brainLesionCNN_tool\\CNN\\models\\seg_model.pth'))
+        self.MSK_OBJ.newMsk(run_segmentation(self.t1_fp, self.t2_fp, self.tl_fp, './models/seg_model.pth'))
 
     def separate_button_clicked(self):
         self.IMG_OBJ.__loadImage__(self.tl_fp)
-        self.MSK_OBJ.newMsk(run_separation(self.t1_fp, self.t2_fp, self.tl_fp, self.MSK_OBJ.MSK, '.\\tools\\brainLesionCNN_tool\\CNN\\models\\sep_model.pth'))
+        self.MSK_OBJ.newMsk(run_separation(self.t1_fp, self.t2_fp, self.tl_fp, self.MSK_OBJ.MSK, './models/sep_model.pth'))
 
     def t1_button_clicked(self):
         self.t1_fp = self.getValidFilePath(prompt='Select T1 image')[0]
