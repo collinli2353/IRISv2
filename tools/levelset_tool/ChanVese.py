@@ -8,7 +8,6 @@ import nibabel as nib
 
 
 def iterateChanVese2D(lsf, img, mu, nu, epison, step):
-
     Drc = (epison / math.pi) / (epison*epison + lsf*lsf)
     Hea = 0.5*(1 + (2 / math.pi) * np.arctan(lsf/epison))
     Iy, Ix = np.gradient(lsf)
@@ -34,16 +33,7 @@ def iterateChanVese2D(lsf, img, mu, nu, epison, step):
 
     return lsf
 
-def runChanVese2D(img, lsf, mu=1, nu=0.2, max_iter=30, epison=0.1, step=0.1):
-    for _ in range(1, max_iter):
-        lsf = iterateChanVese2D(lsf, img, mu, nu, epison, step)
-        # showImgContour(lsf, img)
-
-    return lsf
-
-
 def iterateChanVese3D(lsf, img, mu, nu, epison, step):
-
     Drc = (epison / math.pi) / (epison*epison + lsf*lsf)
     Hea = 0.5*(1 + (2 / math.pi) * np.arctan(lsf/epison))
     Iz, Iy, Ix = np.gradient(lsf)
@@ -71,12 +61,11 @@ def iterateChanVese3D(lsf, img, mu, nu, epison, step):
 
     return lsf
 
+def runChanVese2D(img, lsf, mu=1, nu=0.2, max_iter=30, epison=0.1, step=0.1):
+    for _ in range(1, max_iter): lsf = iterateChanVese2D(lsf, img, mu, nu, epison, step)
+    return lsf
+    
 def runChanVese3D(img, lsf, mu=1, nu=0.2, max_iter=30, epison=0.1, step=0.1):
-    for _ in range(1, max_iter):
-        lsf = iterateChanVese3D(lsf, img, mu, nu, epison, step)
+    for _ in range(1, max_iter): lsf = iterateChanVese3D(lsf, img, mu, nu, epison, step)
 
     return lsf
-
-
-if __name__ == "__main__":
-    pass

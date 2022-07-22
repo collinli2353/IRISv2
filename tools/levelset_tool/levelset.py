@@ -2,9 +2,8 @@ import PySide6
 from PySide6 import QtCore, QtGui, QtWidgets
 import numpy as np
 from tools.levelset_tool.ChanVese import runChanVese2D, runChanVese3D
-from tools.levelset_tool.ui_levelset_widget import *
+from tools.levelset_tool.ui_levelset_widget import Ui_levelset_widget
 from tools.default_tool import Meta, default_tool
-from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
 from utils.utils import theBrushPen
 
 class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
@@ -12,31 +11,28 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
         QtWidgets.QWidget.__init__(self)
         self.ui = Ui_levelset_widget()
         self.ui.setupUi(self)
-
-        self.IMG_OBJ = IMG_OBJ()
-        self.MSK_OBJ = MSK_OBJ()
-        self.TOOL_OBJ = TOOL_OBJ()
-
-        self.brush_size = 20
-        self.brush_type = 'local'
-        self.brush_dim = '2D'
+        self.setupGlobalConstants()
 
         def setBrushType(type, dim):
             self.brush_type = type
             self.brush_dim = dim
+            self.IMG_OBJ.UPDATE_VIEWERS()
         
         def setBrushSize(size):
             self.brush_size = size
             self.ui.levelsetSize_label.setText(str(size))
+            self.IMG_OBJ.UPDATE_VIEWERS()
 
-        self.ui.levelsetSize_slider.valueChanged.connect(setBrushSize)
         self.ui.levelset2D_button.clicked.connect(lambda: setBrushType(self.brush_type, '2D'))
         self.ui.levelset3D_button.clicked.connect(lambda: setBrushType(self.brush_type, '3D'))
         self.ui.levelsetAuto_button.clicked.connect(lambda: setBrushType('auto', self.brush_dim))
         self.ui.levelsetLocal_button.clicked.connect(lambda: setBrushType('local', self.brush_dim))
 
-        setBrushType(self.brush_type, self.brush_dim)
-        setBrushSize(self.brush_size)
+        self.ui.levelsetSize_slider.valueChanged.connect(setBrushSize)
+
+        self.brush_size = 15
+        self.brush_type = 'local'
+        self.brush_dim = '2D'
 
     def normMinMax(self, img, msk=None, p_val=None, ll=0, rr=255):
         new_img = np.zeros(img.shape)
@@ -93,41 +89,30 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
             return msk
 
         msk[x, y] = 1
-        if x > 0:
-            msk = self.recursive(orig_msk, msk, x-1, y)
-        if x < msk.shape[0]-1:
-            msk = self.recursive(orig_msk, msk, x+1, y)
-        if y > 0:
-            msk = self.recursive(orig_msk, msk, x, y-1)
-        if y < msk.shape[1]-1:
-            msk = self.recursive(orig_msk, msk, x, y+1)
+        if x > 0: msk = self.recursive(orig_msk, msk, x-1, y)
+        if x < msk.shape[0]-1: msk = self.recursive(orig_msk, msk, x+1, y)
+        if y > 0: msk = self.recursive(orig_msk, msk, x, y-1)
+        if y < msk.shape[1]-1: msk = self.recursive(orig_msk, msk, x, y+1)
 
         return msk
 
     def recursive3D(self, orig_msk, msk, x, y, z):
-        print(x, y ,z)
         if orig_msk[x, y, z] != 1 or msk[x, y, z] == 1:
             return msk
 
         msk[x, y, z] = 1
-        if x > 0:
-            msk = self.recursive3D(orig_msk, msk, x-1, y, z)
-        if x < msk.shape[0]-1:
-            msk = self.recursive3D(orig_msk, msk, x+1, y, z)
-        if y > 0:
-            msk = self.recursive3D(orig_msk, msk, x, y-1, z)
-        if y < msk.shape[1]-1:
-            msk = self.recursive3D(orig_msk, msk, x, y+1, z)
-        if z > 0:
-            msk = self.recursive3D(orig_msk, msk, x, y, z-1)
-        if z < msk.shape[2]-1:
-            msk = self.recursive3D(orig_msk, msk, x, y, z+1)
+        if x > 0:  msk = self.recursive3D(orig_msk, msk, x-1, y, z)
+        if x < msk.shape[0]-1: msk = self.recursive3D(orig_msk, msk, x+1, y, z)
+        if y > 0:  msk = self.recursive3D(orig_msk, msk, x, y-1, z)
+        if y < msk.shape[1]-1:  msk = self.recursive3D(orig_msk, msk, x, y+1, z)
+        if z > 0:  msk = self.recursive3D(orig_msk, msk, x, y, z-1)
+        if z < msk.shape[2]-1:  msk = self.recursive3D(orig_msk, msk, x, y, z+1)
 
         return msk
 
     def widgetMouseMoveEvent(self, event, axis):
         x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
-        xx, yy, w, h = self.computeCoords(xx, yy, self.brush_size, self.brush_size, margin, self.IMG_OBJ.ZOOM_FACTOR, shape)
+        xx, yy, w, h = self.computeCoords(xx, yy, self.brush_size, self.brush_size, shape)
         self.IMG_OBJ.POINT_POS = [x, y, z]
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:

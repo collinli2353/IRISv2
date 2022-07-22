@@ -3,10 +3,9 @@ import PySide6
 from PySide6 import QtCore, QtGui, QtWidgets
 from skimage.draw import ellipse
 from skimage.morphology import octagon
-from tools.brush_tool.ui_brush_widget import *
+from tools.brush_tool.ui_brush_widget import Ui_brush_widget
 from tools.default_tool import Meta, default_tool
-from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
-from utils.utils import clamp, theBrushPen
+from utils.utils import theBrushPen
 
 
 class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
@@ -14,30 +13,28 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
         QtWidgets.QWidget.__init__(self)
         self.ui = Ui_brush_widget()
         self.ui.setupUi(self)
+        self.setupGlobalConstants()
 
-        self.IMG_OBJ = IMG_OBJ()
-        self.MSK_OBJ = MSK_OBJ()
-        self.TOOL_OBJ = TOOL_OBJ()
+        def setBrushType(type):
+            self.brush_type = type
+            self.IMG_OBJ.UPDATE_VIEWERS()
 
+        def setBrushSize(value):
+            self.brush_size = int(value)
+            self.ui.brushSize_slider.setValue(int(value))
+            self.ui.brushSize_label.setText(str(value))
+            self.IMG_OBJ.UPDATE_VIEWERS()
+
+        self.ui.brushStyleSquare_button.clicked.connect(lambda: setBrushType('square'))
+        self.ui.brushStyleCircle_button.clicked.connect(lambda: setBrushType('circle'))
+
+        self.ui.brushSize_slider.valueChanged.connect(setBrushSize)
+
+        # Setup Local Constants
+        self.brush_type = 'square'  
         self.brush_size = 5
-        self.brush_type = 'square'
-
-        def setBrushStyleSquare():
-            self.brush_type = 'square'
-
-        def setBrushStyleCircle():
-            self.brush_type = 'circle'
-
-        self.ui.brushStyleSquare_button.clicked.connect(lambda: setBrushStyleSquare())
-        self.ui.brushStyleCircle_button.clicked.connect(lambda: setBrushStyleCircle())
-
-        self.ui.brushSize_slider.setValue(self.brush_size)
-        self.ui.brushSize_slider.valueChanged.connect(self.setBrushSize)
+        self.ui.brushSize_slider.setValue(int(self.brush_size))
         self.ui.brushSize_label.setText(str(self.brush_size))
-
-    def setBrushSize(self, value):
-        self.brush_size = int(value)
-        self.ui.brushSize_label.setText(str(value))
 
     def handlePaint(self, msk, brush_type, pos, w, h, isPaint):
         s_x, s_y, lbl = pos[0]-w//2, pos[1]-h//2, self.MSK_OBJ.CURRENT_LBL
@@ -75,30 +72,26 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
     def widgetMouseMoveEvent(self, event, axis):
         x, y, z, xx, yy, margin, shape = self.computePosition(event, axis)
-        xx, yy, w, h = self.computeCoords(xx, yy, self.brush_size, self.brush_size, margin, self.IMG_OBJ.ZOOM_FACTOR, shape)
+        xx, yy, w, h = self.computeCoords(xx, yy, self.brush_size, self.brush_size, shape)
 
         self.IMG_OBJ.POINT_POS = [x, y, z]
         
         if event.buttons() & PySide6.QtCore.Qt.LeftButton:
-            if axis == 'axi':
-                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, True)
-            elif axis == 'sag':
-                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, True)
-            elif axis == 'cor':
-                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, True)
+            if axis == 'axi': self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, True)
+            elif axis == 'sag': self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, True)
+            elif axis == 'cor': self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, True)
 
         elif event.buttons() & PySide6.QtCore.Qt.RightButton:
-            if axis == 'axi':
-                self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, False)
-            elif axis == 'sag':
-                self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, False)
-            elif axis == 'cor':
-                self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, False)
+            if axis == 'axi': self.MSK_OBJ.MSK[:, :, z] = self.handlePaint(self.MSK_OBJ.MSK[:, :, z], self.brush_type, [xx, yy], w, h, False)
+            elif axis == 'sag': self.MSK_OBJ.MSK[x, :, :] = self.handlePaint(self.MSK_OBJ.MSK[x, :, :], self.brush_type, [xx, yy], w, h, False)
+            elif axis == 'cor': self.MSK_OBJ.MSK[:, y, :] = self.handlePaint(self.MSK_OBJ.MSK[:, y, :], self.brush_type, [xx, yy], w, h, False)
 
-        elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
+        elif event.buttons() & QtCore.Qt.MiddleButton:
             diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
             diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.y()
-            self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
+            if axis == 'axi': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
+            elif axis == 'sag': self.IMG_OBJ.SHIFT = [0, self.IMG_OBJ.SHIFT[1] - diffX, self.IMG_OBJ.SHIFT[2] - diffY]
+            elif axis == 'cor': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, 0, self.IMG_OBJ.SHIFT[2] - diffY]
 
         self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.x(), event.y()]
 
@@ -108,8 +101,7 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
         cx, cy = new_point[0], new_point[1]          
         cx, cy = np.round((cx-margin[0])/zoom), np.round((cy-margin[1])/zoom)
         s_x, s_y = cx - self.brush_size // 2, cy - self.brush_size // 2 
-        s_x = s_x * zoom + margin[0]
-        s_y = s_y * zoom + margin[1]
+        s_x, s_y = s_x * zoom + margin[0], s_y * zoom + margin[1]
         w = self.brush_size * zoom
         
         if self.brush_type == 'square':
@@ -118,7 +110,6 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
             painter.drawLine(s_x+w,s_y+w,s_x,s_y+w)
             painter.drawLine(s_x+w,s_y+w,s_x+w,s_y)
 
-        elif self.brush_type == 'circle':
-            painter.drawEllipse(s_x, s_y, w, w)
+        elif self.brush_type == 'circle': painter.drawEllipse(s_x, s_y, w, w)
 
         return painter
