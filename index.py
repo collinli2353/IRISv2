@@ -203,6 +203,21 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     # ================================================== #
     # Menubar Actions ================================== #
     # ================================================== #
+    def prompt(self, title='', msg='', msg2='', detail='', buttons=[], default: str=None, icon=PySide6.QtWidgets.QMessageBox.NoIcon):
+        
+        msgbox = PySide6.QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle(title)
+        msgbox.setText(msg)
+        msg2 and msgbox.setInformativeText(msg2)
+        detail and msgbox.setDetailedText(detail)
+        for btntxt, btnrole in buttons: msgbox.addButton(btntxt, btnrole)
+        icon and msgbox.setIcon(icon)
+        response = ['']
+        msgbox.buttonClicked.connect(lambda btn: response.__setitem__(0, btn.text()))
+        msgbox.exec()
+    
+        return response
+
     def openImageAction(self):
         fp = self.getValidFilePath(prompt='Open Image', is_save=False)[0]
         if not fp:
@@ -242,6 +257,9 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         if not fp:
             return
 
+        self.openSegmentation(fp)
+
+    def openSegmentation(self, fp):
         msk = nib.load(fp).get_fdata()
         self.MSK_OBJ.newMsk(msk)
         self.ui.segActiveLabel_combobox.clear()
@@ -331,18 +349,18 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
         self.update()
 
     def topLeft_labelMousePressEvent(self, event):
-        self.TOOL_OBJ.INIT_MOUSE_POS['axi'] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS['axi'] = [event.position().x(), event.position().y()]
         self.topLeft_labelMouseMoveEvent(event)
 
     def topRight_labelMousePressEvent(self, event):
-        self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS['sag'] = [event.position().x(), event.position().y()]
         self.topRight_labelMouseMoveEvent(event)
 
     def botLeft_labelMousePressEvent(self, event):
         pass
 
     def botRight_labelMousePressEvent(self, event):
-        self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS['cor'] = [event.position().x(), event.position().y()]
         self.botRight_labelMouseMoveEvent(event)
 
     def labelMouseReleaseevent(self, event):
@@ -357,6 +375,31 @@ class MainWindow(PySide6.QtWidgets.QMainWindow):
     def topRight_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'sag')
     def botLeft_labelMouseMoveEvent(self, event): pass
     def botRight_labelMouseMoveEvent(self, event): self.labelMouseMoveEvent(event, 'cor')
+
+
+    def dropEvent(self, event):
+        event.accept()
+        fp = event.mimeData().urls()[0].toLocalFile()
+
+        (res,) = self.prompt(
+            title='Load Image',
+            msg='Which should be done with this image?',
+            detail=fp,
+            buttons=[
+                ('Load as Main Image', PySide6.QtWidgets.QMessageBox.AcceptRole),
+                ('Load as Segmentation', PySide6.QtWidgets.QMessageBox.AcceptRole),
+                ('Cancel', PySide6.QtWidgets.QMessageBox.RejectRole),
+            ], default='Load as Main Image'
+        )
+
+        if res in ('Cancel', ''):
+            return
+        elif res in ('Load as Main Image',''):
+            self.openImage(fp)
+        elif res in ('Load as Segmentation',''):
+            self.openSegmentation(fp)
+
+    def dragEnterEvent(self, event): event.accept()
 
     # ================================================== #
     # Wheel Event ====================================== #

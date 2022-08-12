@@ -87,12 +87,12 @@ class brush(QtWidgets.QWidget, default_tool, metaclass=Meta):
 
         elif event.buttons() & QtCore.Qt.MiddleButton:
             diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
-            diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.y()
+            diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.position().y()
             if axis == 'axi': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
             elif axis == 'sag': self.IMG_OBJ.SHIFT = [0, self.IMG_OBJ.SHIFT[1] - diffX, self.IMG_OBJ.SHIFT[2] - diffY]
             elif axis == 'cor': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, 0, self.IMG_OBJ.SHIFT[2] - diffY]
 
-        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.x(), event.position().y()]
 
     def widgetDraw(self, pixmap, new_foc, new_point, zoom, margin, spacing, newshape):
         painter = QtGui.QPainter(pixmap)

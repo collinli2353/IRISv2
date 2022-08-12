@@ -37,7 +37,7 @@ class default_tool(ABC):
 
         if axis == 'axi':
             [xx, yy] = computePosition2D(
-                event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+                event.position().x(), event.position().y(), self.IMG_OBJ.ZOOM_FACTOR,
                 self.IMG_OBJ.MARGIN['axi'],
                 self.IMG_OBJ.IMG_FLIP['axi'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[1]]
             )
@@ -45,7 +45,7 @@ class default_tool(ABC):
             margin, shape = self.IMG_OBJ.MARGIN['axi'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[1]]
         elif axis == 'sag':
             [xx, yy] = computePosition2D(
-                event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+                event.position().x(), event.position().y(), self.IMG_OBJ.ZOOM_FACTOR,
                 self.IMG_OBJ.MARGIN['sag'],
                 self.IMG_OBJ.IMG_FLIP['sag'], [self.IMG_OBJ.SHAPE[1], self.IMG_OBJ.SHAPE[2]]
             )
@@ -53,7 +53,7 @@ class default_tool(ABC):
             margin, shape = self.IMG_OBJ.MARGIN['sag'], [self.IMG_OBJ.SHAPE[1], self.IMG_OBJ.SHAPE[2]]
         elif axis == 'cor':
             [xx, yy] = computePosition2D(
-                event.x(), event.y(), self.IMG_OBJ.ZOOM_FACTOR,
+                event.position().x(), event.position().y(), self.IMG_OBJ.ZOOM_FACTOR,
                 self.IMG_OBJ.MARGIN['cor'],
                 self.IMG_OBJ.IMG_FLIP['cor'], [self.IMG_OBJ.SHAPE[0], self.IMG_OBJ.SHAPE[2]]
             )

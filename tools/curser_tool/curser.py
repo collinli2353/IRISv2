@@ -39,13 +39,13 @@ class curser(QtWidgets.QWidget, default_tool, metaclass=Meta):
             self.IMG_OBJ.ZOOM_FACTOR = clamp(0.3, self.IMG_OBJ.ZOOM_FACTOR, 15)
 
         elif event.buttons() & QtCore.Qt.MiddleButton:
-            diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
+            diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.position().x()
             diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.y()
             if axis == 'axi': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
             elif axis == 'sag': self.IMG_OBJ.SHIFT = [0, self.IMG_OBJ.SHIFT[1] - diffX, self.IMG_OBJ.SHIFT[2] - diffY]
             elif axis == 'cor': self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, 0, self.IMG_OBJ.SHIFT[2] - diffY]
 
-        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.position().x(), event.position().y()]
 
     def widgetDraw(self, pixmap, new_foc, new_point, zoom, margin, spacing, newshape):
         painter = QtGui.QPainter(pixmap)

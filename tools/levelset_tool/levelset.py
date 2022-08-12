@@ -163,11 +163,11 @@ class levelset(QtWidgets.QWidget, default_tool, metaclass=Meta):
                 self.MSK_OBJ.MSK[xx-w//2:xx+w//2, y, yy-h//2:yy+h//2] = 0
 
         elif event.buttons() & PySide6.QtCore.Qt.MiddleButton:
-            diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.x()
-            diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.y()
+            diffX = self.TOOL_OBJ.INIT_MOUSE_POS[axis][0] - event.position().x()
+            diffY = self.TOOL_OBJ.INIT_MOUSE_POS[axis][1] - event.position().y()
             self.IMG_OBJ.SHIFT = [self.IMG_OBJ.SHIFT[0] - diffX, self.IMG_OBJ.SHIFT[1] - diffY, 0]
 
-        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.x(), event.y()]
+        self.TOOL_OBJ.INIT_MOUSE_POS[axis] = [event.position().x(), event.position().y()]
 
     def widgetDraw(self, pixmap, new_foc, new_point, zoom, margin, spacing, newshape):
         painter = QtGui.QPainter(pixmap)
