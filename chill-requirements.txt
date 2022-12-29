@@ -1,3 +1,5 @@
+nibabel
+numpy
 geodistk
 macholib
 matplotlib
@@ -6,12 +8,11 @@ opencv-python
 pyinstaller
 pyqt6
 pyside6
-pywin32
 qt-material
 qt6-tools
 scikit-image
 simplecrf
-sklearn
+scikit-learn
 torchaudio
 torchvision
 wincertstore

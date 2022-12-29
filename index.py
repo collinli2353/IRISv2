@@ -18,7 +18,6 @@ from ui_MainWindow import *
 from utils.globalConstants import IMG_OBJ, MSK_OBJ, TOOL_OBJ
 from utils.utils import clamp
 
-
 class MainWindow(PySide6.QtWidgets.QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
